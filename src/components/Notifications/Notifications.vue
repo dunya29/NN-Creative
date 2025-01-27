@@ -3,6 +3,7 @@
 	import { RouterLink } from 'vue-router'
 	import NotificationsIcon from '../Icons/NotificationsIcon.vue'
 	import NotificationCard from './NotificationCard.vue'
+	import { notificationsApi } from '@/api/api'
 
 	const props = defineProps({
 		isHeaderHidden: Boolean,
@@ -12,65 +13,24 @@
 	const unReadNotifications = ref([])
 	const notificationsRef = ref(null)
 	const getNotifications = async () => {
-		const items = [
-			{
-				id: 1734783643968,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				project_id: 2,
-				title: 'Минин и Пожарский спасают Нижний Новгород',
-				imageURL: [
-					{
-						name: 'doc-preview.jpg',
-						url: 'projects/project.jpg',
-					},
-				],
-				isRead: false,
-			},
-			{
-				id: 1734783643967,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				project_id: 2,
-				title: 'Минин и Пожарский спасают Нижний Новгород',
-				imageURL: [
-					{
-						name: 'doc-preview.jpg',
-						url: 'projects/project.jpg',
-					},
-				],
-				isRead: false,
-			},
-			{
-				id: 1734783643966,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				project_id: 1,
-				title: 'Минин и Пожарский спасают Нижний Новгород',
-				imageURL: [
-					{
-						name: 'doc-preview.jpg',
-						url: 'projects/project.jpg',
-					},
-				],
-				isRead: true,
-			},
-			{
-				id: 1734783643965,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				project_id: 2,
-				title: 'Минин и Пожарский спасают Нижний Новгород',
-				imageURL: [
-					{
-						name: 'doc-preview.jpg',
-						url: 'projects/project.jpg',
-					},
-				],
-				isRead: true,
-			},
-		]
-		readNotifications.value = items.filter(item => item.isRead)
-		unReadNotifications.value = items.filter(item => !item.isRead)
+		try {
+			const { data } = await notificationsApi.getItems()
+			readNotifications.value = [...data.items].filter(item => item.isRead)
+			unReadNotifications.value = [...data.items].filter(item => !item.isRead)
+		} catch (err) {
+			console.log(err)
+		}
 	}
 	const onRead = async id => {
-		console.log('onRead')
+		await getNotifications()
+		try {
+			await notificationsApi.editItem(id, {
+				isRead: true,
+			})
+			getNotifications()
+		} catch (err) {
+			console.log(err)
+		}
 	}
 	const handleClickOutside = event => {
 		if (
@@ -81,12 +41,17 @@
 			showNotifications.value = false
 		}
 	}
+	let notificationsInterval
 	onMounted(async () => {
 		getNotifications()
 		window.addEventListener('click', handleClickOutside)
+		notificationsInterval = setInterval(() => {
+			getNotifications()
+		}, 60000)
 	})
 	onUnmounted(() => {
 		window.removeEventListener('click', handleClickOutside)
+		clearInterval(notificationsInterval)
 	})
 	watch(
 		() => props.isHeaderHidden,

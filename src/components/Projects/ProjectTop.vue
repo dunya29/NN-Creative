@@ -47,6 +47,7 @@
 	const editAllowStatus = ['1', '2', '9']
 	const loadingDraft = ref(false)
 	const loadingModerate = ref(false)
+	const loadingSave = ref(false)
 	const closeProjectNotyMod = ref(false)
 	const delProjectMod = ref(false)
 	const delLoading = ref(false)
@@ -58,7 +59,6 @@
 	const statusChangeMod = ref(false)
 	const statusChangeLoading = ref(false)
 	const deadlineMod = ref(false)
-	const deadlineLoading = ref(false)
 	const errorsTotal = computed(() => {
 		let error = 0
 		props.fields.forEach(arr => {
@@ -200,7 +200,11 @@
 			} else {
 				obj.status = props.projectItem.status
 			}
-			loadingModerate.value = true
+			if (action === 'save') {
+				loadingSave.value = true
+			} else {
+				loadingModerate.value = true
+			}			
 		}
 		if (!props.id) {
 			obj.user_id = storeAuth.userData.id
@@ -219,6 +223,7 @@
 					storeAuth.userData.userRole,
 					storeAuth.userData.id
 				)
+				onClose()
 			} else {
 				await projectsApi.editItem(
 					props.id,
@@ -226,25 +231,38 @@
 					storeAuth.userData.userRole,
 					storeAuth.userData.id
 				)
+				onClose()
 			}
-			onClose()
 		} catch (err) {
 			console.log(err)
 			errorMod.value = true
 		} finally {
 			loadingDraft.value = false
 			loadingModerate.value = false
+			loadingSave.value = false
 		}
 	}
 	const onModerate = async action => {
-		props.projectForm.onModerate()
-		await nextTick()
-		if (errorsTotal.value === 0) {
-			setProject(action)
+		if (action === 'moderate' || storeAuth.userData.userRole === 'manager') {
+			props.projectForm.onModerate()
+			await nextTick()
+			if (errorsTotal.value === 0) {
+				setProject(action)
+			}
+		} else {
+			props.projectForm.onDraft()
+			await nextTick()
+			if (errorsTotal.value === 0) {
+				setProject(action)
+			}
 		}
 	}
-	const onDraft = () => {
-		setProject('draft')
+	const onDraft = async () => {
+		props.projectForm.onDraft()
+		await nextTick()
+		if (errorsTotal.value === 0) {
+			setProject('draft')
+		}
 	}
 	const onClose = () => {
 		if (props.projectForm) {
@@ -256,9 +274,9 @@
 		delLoading.value = true
 		try {
 			await projectsApi.delItem(
+				props.id,
 				storeAuth.userData.userRole,
-				storeAuth.userData.id,
-				props.id
+				storeAuth.userData.id
 			)
 			closeProjectMod()
 		} catch (err) {
@@ -276,43 +294,46 @@
 		statusChangeMod.value = true
 	}
 	const statusOnChange = () => {
-		statusChangeLoading.value = true
-		emit('statusOnChange', { status: newStatus.value }, () => {
-			statusChangeLoading.value = false
+		if (['1', '2'].includes(newStatus.value)) {
 			statusChangeMod.value = false
-			if (['1', '2'].includes(newStatus.value)) {
-				deadlineMod.value = true
-			}
-			if (props.projectItem.status === '3') {
-				setModerateDate()
-			}
-		})
+			deadlineMod.value = true
+		} else {
+			statusChangeLoading.value = true
+			emit(
+				'statusOnChange',
+				{ status: newStatus.value },
+				() => {
+					statusChangeLoading.value = false
+					statusChangeMod.value = false
+				},
+				() => {
+					statusChangeLoading.value = false
+					errorMod.value = true
+				}
+			)
+		}
 	}
 	const setDeadline = async date => {
-		try {
-			await projectsApi.editItem(props.id, {
-				deadline: date,
-			})
-			deadlineMod.value = false
-		} catch (err) {
-			console.log(err)
-			errorMod.value = true
-		}
-	}
-	const setModerateDate = async () => {
-		try {
-			await projectsApi.editItem(props.id, {
-				moderateDate: new Date().toISOString(),
-			})
-		} catch (err) {
-			console.log(err)
-			errorMod.value = true
-		}
+		statusChangeLoading.value = true
+		emit(
+			'statusOnChange',
+			{ status: newStatus.value, deadline: date },
+			() => {
+				statusChangeLoading.value = false
+				deadlineMod.value = false
+			},
+			() => {
+				statusChangeLoading.value = false
+				errorMod.value = true
+			}
+		)
 	}
 	const closeBtnOnClick = () => {
 		if (!showChat.value) {
 			if (
-				['expert', 'expertSpecComp'].includes(storeAuth.userData.userRole) ||
+				['expert', 'expertSpecComp'].includes(
+					storeAuth.userData.userRole
+				) ||
 				(!props.tabs && storeAuth.userData.userRole === 'user') ||
 				(props.tabs === 'edit' &&
 					(storeAuth.userData.userRole === 'manager' ||
@@ -323,7 +344,7 @@
 			} else {
 				onClose()
 			}
-		} 
+		}
 	}
 	onMounted(() => {
 		if (
@@ -370,11 +391,11 @@
 	)
 </script> 
 <template>
-	<div :class="['project-p__top', `project-p__top--${storeAuth.userData.userRole}`, (tabs === 'view' && storeAuth.userData.userRole === 'manager') && 'isStatus']">
+	<div :class="['project-p__top', `project-p__top--${storeAuth.userData.userRole}`, (tabs === 'view' && storeAuth.userData.userRole === 'manager') && 'isStatus',isHeaderHidden && 'unshow']">
 		<div :class="['project-p__sticky', isHeaderScrolled && 'scroll', isHeaderHidden && 'unshow']" ref="projectTopRef">
 			<div class="project-p__inner">
 				<div class="project-p__actions">
-					<button v-if="!tabs && storeAuth.userData.userRole === 'user'" :class="['btn stroke-btn-primary btn--icon', loadingDraft && 'loading']" @click="() => {onDraft();onClose()}" :disabled="loadingDraft">
+					<button v-if="!tabs && storeAuth.userData.userRole === 'user'" :class="['btn stroke-btn-primary btn--icon', loadingDraft && 'loading']" @click="() => onDraft()" :disabled="loadingDraft">
 						<span>Сохранить черновик и выйти</span>
 						<Save />
 					</button>
@@ -396,12 +417,12 @@
 					<button v-if="!errorsTotal && (storeAuth.userData.userRole === 'user' && (!tabs || (tabs === 'edit' && projectItem.status && editAllowStatus.includes(projectItem.status))))" :class="['btn main-btn btn--moderate', loadingModerate && 'loading']" @click="() => onModerate('moderate')" :disabled="loadingModerate">
 						<span>Отправить <span>на модерацию</span></span>
 					</button>
-					<Status v-if="tabs === 'view' && storeAuth.userData.userRole === 'manager'" :projectDelete="true" :items="storeCommon.statusArr" :selected="newStatus" @onChange="setStatus" @showDelProjectMod="showDelProjectMod" :isHeaderHidden="isHeaderHidden" />
+					<Status v-if="tabs === 'view' && storeAuth.userData.userRole === 'manager'" :projectDelete="true" :items="storeCommon.statusArr" :selected="projectItem.status" @onChange="setStatus" @showDelProjectMod="showDelProjectMod" :isHeaderHidden="isHeaderHidden" />
 					<button v-if="tabs === 'edit' && projectItem.status && projectItem.status === '9'" :class="['btn stroke-btn-primary btn--icon', loadingDraft && 'loading']" @click="() => onDraft()" :disabled="loadingDraft">
 						<span>Сохранить черновик</span>
 						<Save />
 					</button>
-					<button v-if="!errorsTotal && tabs === 'edit' && ['user', 'manager'].includes(storeAuth.userData.userRole) && projectItem.status && projectItem.status !== '9'" :class="['btn stroke-btn-primary btn--icon', loadingModerate && 'loading']" @click="() => onModerate('save')" :disabled="loadingModerate">
+					<button v-if="tabs === 'edit' && projectItem.status && projectItem.status !== '9'" :class="['btn stroke-btn-primary btn--icon', loadingSave && 'loading']" @click="() => onModerate('save')" :disabled="loadingSave">
 						<span>Сохранить</span>
 						<Save />
 					</button>
@@ -423,7 +444,7 @@
 				</Teleport>
 				<Teleport to="body">
 					<transition name="fadeUp">
-						<DeadlineMod v-if="deadlineMod" :loading="deadlineLoading" @setDeadline="setDeadline" @closeModal="() => deadlineMod = false" />
+						<DeadlineMod v-if="deadlineMod" :loading="statusChangeLoading" @setDeadline="setDeadline" @closeModal="() => deadlineMod = false" />
 					</transition>
 				</Teleport>
 				<Teleport to="body">
@@ -438,7 +459,7 @@
 				</Teleport>
 				<Teleport to="body">
 					<transition name="fadeUp">
-						<ErrorMod v-if="errorMod" @closeModal="()=>error = false" />
+						<ErrorMod v-if="errorMod" @closeModal="()=>errorMod = false" />
 					</transition>
 				</Teleport>
 			</div>

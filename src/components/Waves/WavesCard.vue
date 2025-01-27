@@ -1,5 +1,5 @@
 <script setup>
-	import { ref } from 'vue'
+	import { computed, ref } from 'vue'
 	import DelWaveMod from '../Modals/DelWaveMod.vue'
 	import AddEditWaveMod from '../Modals/AddEditWaveMod.vue'
 	import Edit from '../Icons/Edit.vue'
@@ -10,7 +10,9 @@
 		name: String,
 		start: String,
 		end: String,
+		disabledDates: Array,
 	})
+
 	const emit = defineEmits(['delWave', 'editWave'])
 	const delModal = ref(false)
 	const delLoading = ref(false)
@@ -54,12 +56,12 @@
 		</td>
 		<Teleport to="body">
 			<transition name="fadeUp">
-				<DelWaveMod v-if="delModal" :loading="delLoading" @delWave="delWave" @closeModal="closeDelModal"/>
+				<DelWaveMod v-if="delModal" :loading="delLoading" @delWave="delWave" @closeModal="closeDelModal" />
 			</transition>
 		</Teleport>
 		<Teleport to="body">
 			<transition name="fadeUp">
-				<AddEditWaveMod v-if="editModal" :name="name" :start="start" :end="end" title="Редактирование волны" @editWave="editWave" @closeModal="closeEditModal" />
+				<AddEditWaveMod v-if="editModal" :name="name" :start="start" :end="end" title="Редактирование волны" @editWave="editWave" @closeModal="closeEditModal" :disabledDates="disabledDates" />
 			</transition>
 		</Teleport>
 	</tr>

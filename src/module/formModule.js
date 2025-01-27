@@ -5,6 +5,8 @@ export const useFormModule = () => {
     const emailVal = ref('')
     const passVal = ref('')
     const formError = ref(null)
+    const onError = ref(false)
+    const errorTitle = ref(null)
     function loginValidate(val) {
         return val ? true : 'Заполните поле'
     }
@@ -57,5 +59,17 @@ export const useFormModule = () => {
     function agreeValidate(val) {
         return val === true ? true : 'Требуется согласие'
     }
-    return { formError, loginValidate, emailValidate, phoneValidate, passwordValidate, loginPasswordValidate, passwordConfirmValidate, agreeValidate }
+    function formOnError(err, values, setFieldError) {
+        if (err.response.data.errors.validation) {
+            for (let key in values) {
+                if (err.response.data.errors.validation[key]) {
+                    setFieldError(key, err.response.data.errors.validation[key])
+                }
+            }
+        } else if (err.response.data.errors.common) {
+            onError.value = true
+            errorTitle.value = err.response.data.errors.common
+        }
+    }
+    return { formError, onError, errorTitle, loginValidate, emailValidate, phoneValidate, passwordValidate, loginPasswordValidate, passwordConfirmValidate, agreeValidate, formOnError }
 }

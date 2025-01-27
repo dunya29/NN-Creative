@@ -71,10 +71,18 @@
 		})
 		if (!docFormFields.some(item => item.error)) {
 			let newDoc = {
-				//imageURL: docFormFields[0].value[0].url,
-				//videoURL: docFormFields[1].value[0].url,
-				imageURL: 'docs/doc-preview.jpg',//удалить
-				videoURL: 'docs/doc-video.mp4',//удалить
+				imageURL: [
+					{
+						"name": docFormFields[0].value[0].name,
+						"url": docFormFields[0].value[0].url,
+					}
+				],
+				videoURL: [
+					{
+						"name": docFormFields[1].value[0].name,
+						"url": docFormFields[1].value[0].url,
+					}
+				],
 				orderId: props.maxOrderId + 1,
 			}
 			loading.value = true

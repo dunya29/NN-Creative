@@ -4,70 +4,75 @@
 	import MessagesView from './MessagesView.vue'
 	import { useAuthStore } from '@/store/auth'
 	import { useCommonStore } from '@/store/common'
+	import { messagesApi } from '@/api/api'
 
 	const props = defineProps({
 		projectId: Number,
-		showChat: Boolean
+		showChat: Boolean,
 	})
 	const emit = defineEmits(['setChat'])
 	const storeAuth = useAuthStore()
 	const storeCommon = useCommonStore()
+	const mounted = ref(false)
 	const messages = ref([])
 	const unReadMessages = ref([])
 	const messagesRef = ref(null)
 	const getMessages = async () => {
-		const items = [
-			{
-				id: 1734783643955,
-				user_id: 3,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				text: 'Добрый день! Спасибо за обратную связь, обязательно поправим)',
-				isRead: true,
-			},
-			{
-				id: 1734783643956,
-				user_id: 3,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				text: 'Добрый день! Спасибо за обратную связь, обязательно поправим)',
-				isRead: true,
-			},
-			{
-				id: 1734783643957,
-				user_id: 1,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				text: 'Добрый день! Фокус проекта сместился на проработку вопросов Веранды. Просим отразить данные изменения в заявке проекта',
-				isRead: true,
-			},
-			{
-				id: 1734783643958,
-				user_id: 1,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				text: 'Добрый день! Фокус проекта сместился на проработку вопросов Веранды. Просим отразить данные изменения в заявке проекта',
-				isRead: true,
-			},
-			{
-				id: 1734783643959,
-				user_id: 3,
-				timestamp: '2024-12-11T15:08:52.143Z',
-				text: 'Добрый день! Спасибо за обратную связь, обязательно поправим)',
-				isRead: false,
-			},
-		]
-		messages.value = [...items]
-		unReadMessages.value = messages.value.filter(
-			item => item['user_id'] !== storeAuth.userData.id && !item.isRead
-		)
-	}
-	const onRead = () => {
-		if (unReadMessages.value.length > 0) {
-			unReadMessages.value.forEach(async item => {
-				console.log('onRead')
+		try {
+			const { data } = await messagesApi.getItems({
+				project_id: props.projectId,
 			})
+			messages.value = [...data]
+			unReadMessages.value = messages.value.filter(
+				item => Number(item['user_id']) !== Number(storeAuth.userData.id) && !item.isRead
+			)
+		} catch (err) {
+			console.log(err)
+		} finally {
+			if (mounted.value) {
+				getMessages()
+			}
 		}
 	}
-	const sendMessage = async (message, callback) => {
-		console.log(message)
-		callback()
+	const onRead = async () => {
+		await getMessages()
+		try {
+			if (unReadMessages.value.length > 0) {
+				let isReadArr = unReadMessages.value.map(item => ({
+					id: item.id,
+					isRead: true,
+				}))
+				await messagesApi.editItem({
+					isRead: {
+						user_id: storeAuth.userData.id,
+						project_id: props.projectId,
+						isReadArr,
+					},
+				})
+			}
+		} catch (err) {
+			console.log(err)
+		}
+	}
+	const sendMessage = async (message, onSuccess, callback) => {
+		try {
+			let messageObj = {
+				project_id: props.projectId,
+				message: {
+					user_id: storeAuth.userData.id,
+					text: message,
+					isRead: false,
+				},
+			}
+			await messagesApi.postItem(messageObj)
+			await getMessages()
+			onSuccess()
+		} catch (err) {
+			console.log(err)
+		} finally {
+			callback()
+		}
+		
 	}
 	const handleClickOutside = event => {
 		if (
@@ -79,6 +84,7 @@
 		}
 	}
 	onMounted(() => {
+		mounted.value = true
 		getMessages()
 		if (storeCommon.isNotyClicked) {
 			emit('setChat', true)
@@ -87,6 +93,7 @@
 		window.addEventListener('click', handleClickOutside)
 	})
 	onUnmounted(() => {
+		mounted.value = false
 		window.removeEventListener('click', handleClickOutside)
 	})
 </script>

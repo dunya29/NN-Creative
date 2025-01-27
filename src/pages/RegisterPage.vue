@@ -1,5 +1,5 @@
 <script setup>
-	import { provide, ref, watch } from 'vue'
+	import { onBeforeMount, provide, ref, watch } from 'vue'
 	import { useRouter } from 'vue-router'
 	import { registerApi } from '@/api/api'
 	import Search from '@/components/Common/Search.vue'
@@ -12,6 +12,7 @@
 	import simplebar from 'simplebar-vue'
 	import ArrTop from '@/components/Icons/ArrTop.vue'
 	import ArrBottom from '@/components/Icons/ArrBottom.vue'
+	import { useProjectModule } from '@/module/projectModule'
 	const router = useRouter()
 	const registerItems = ref([])
 	const totalCount = ref(null)
@@ -38,6 +39,7 @@
 	}
 	const {
 		isMounted,
+		filterWavesArr,
 		filters,
 		params,
 		queryParams,
@@ -46,12 +48,13 @@
 		filterDirectionArr,
 		filterBooleanArr,
 		setOrder,
+		waveOnChange,
 		statusOnChange,
 		directionOnChange,
 		expertSeenOnChange,
 		wgSeenOnChange,
 		setPage,
-		checkSortParam
+		checkSortParam,
 	} = useTableModule(false, fetchItems)
 	const addComment = async (id, data, reset, callback) => {
 		try {
@@ -64,6 +67,10 @@
 			callback()
 		}
 	}
+
+	onBeforeMount(() => {
+		useProjectModule()
+	})
 	provide('addComment', addComment)
 </script>
 <template>
@@ -147,7 +154,9 @@
 										<Search type="number" v-model="filters.id" />
 									</td>
 									<td>
-										<Search type="number" v-model="filters.wave" />
+										<RadioDropdown v-if="filterWavesArr.length > 1" :items="filterWavesArr" :selected="filters.wave" @onChange="waveOnChange" :isMobModal="true" title="Волна">
+										<span :class="filters.wave && 'selected'">{{ filters.wave ? filterWavesArr.find(item => item.value === filters.wave).name : "Фильтр" }}</span>
+									</RadioDropdown>
 									</td>
 									<td></td>
 									<td></td>
@@ -177,7 +186,7 @@
 								</tr>
 							</thead>
 							<tbody v-if="totalCount > 0">
-								<RegisterCard v-for="item in registerItems" :key="item.id" :item="item" />
+								<RegisterCard v-for="item in registerItems" :key="item.id" :data="{...item,status:filterStatusArr.find(el=>el.value === item.status),direction:filterDirectionArr.find(el=>el.value === item.direction), wave:filterWavesArr.find(el=>item.wave ? el.value === item.wave : null) }" />
 							</tbody>
 						</table>
 					</simplebar>

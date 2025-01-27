@@ -4,7 +4,7 @@
 </script>
 <template>
 	<PageWrap>
-		<section class="section notfound">
+		<section class="notfound">
 			<div class="container">
 				<picture>
 					<source srcset="../assets/images/content/webp/logo.webp" type="image/webp">

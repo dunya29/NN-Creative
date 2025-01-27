@@ -1,7 +1,7 @@
 <script setup>
-	import { inject, onMounted, ref, useTemplateRef } from 'vue'
+	import { inject, onMounted, provide, ref, useTemplateRef } from 'vue'
 	import ProjectForm from '../Projects/ProjectForm.vue'
-	import { projectsApi, ratingApi, ratingArchiveApi } from '@/api/api'
+	import { projectsApi, rateApi, ratingApi, ratingArchiveApi } from '@/api/api'
 	import ProjectTop from '../Projects/ProjectTop.vue'
 	import ProjectView from '../Projects/ProjectView.vue'
 	import { useAuthStore } from '@/store/auth'
@@ -22,6 +22,7 @@
 		[...projectFieldsArr],
 		[...projectGranteeFieldsArr[0].data],
 	])
+	const rateArr = ref([])
 	const rates = ref([])
 	const archiveRates = ref([])
 	const expertRates = ref({})
@@ -45,8 +46,26 @@
 			closeProjectMod()
 		}
 	}
+	const fetchRateArr = async () => {
+		if (
+			['manager', 'expert', 'expertSpecComp'].includes(
+				storeAuth.userData.userRole
+			)
+		) {
+			try {
+				const { data } = await rateApi.getItems()
+				rateArr.value = [...data]
+			} catch (err) {
+				console.log(err)
+			}
+		}
+	}
 	const fetchRates = async () => {
-		if (['manager', 'expert', 'expertSpecComp'].includes(storeAuth.userData.userRole)) {
+		if (
+			['manager', 'expert', 'expertSpecComp'].includes(
+				storeAuth.userData.userRole
+			)
+		) {
 			try {
 				if (storeAuth.userData.userRole === 'manager') {
 					const { data } = await ratingApi.getItems(props.id)
@@ -77,20 +96,21 @@
 			}
 		}
 	}
-	const statusOnChange = async (val, callback) => {
+	const statusOnChange = async (data, callback, onError) => {
+		if (projectItem.value.status === '3') {
+			data = {...data, moderateDate: new Date().toISOString()}		
+		} 
 		try {
-			await projectsApi.editItem(
+			await projectsApi.changeStatus(
 				props.id,
-				val,
-				storeAuth.userData.userRole,
-				storeAuth.userData.id
+				data
 			)
+			callback()
 			fetchProject()
 		} catch (err) {
 			console.log(err)
-		} finally {
-			callback()
-		}
+			onError()
+		} 
 	}
 	const sendRate = async (obj, callback) => {
 		try {
@@ -106,9 +126,7 @@
 			callback()
 		}
 	}
-	onMounted(async () => {
-		fetchProject()
-		fetchRates()
+	const projectOnExpertSeen = async () => {
 		if (
 			props.id &&
 			['expert', 'expertSpecComp'].includes(storeAuth.userData.userRole) &&
@@ -121,6 +139,8 @@
 				console.log(err)
 			}
 		}
+	}
+	const projectOnWgSeen = async () => {
 		if (
 			props.id &&
 			storeAuth.userData.userRole === 'workingGroup' &&
@@ -133,7 +153,15 @@
 				console.log(err)
 			}
 		}
+	}
+	onMounted(async () => {
+		await fetchProject()
+		projectOnExpertSeen()
+		projectOnWgSeen()
+		fetchRateArr()
+		fetchRates()
 	})
+	provide('rateArr', rateArr)
 </script>
 <template>
 	<Modal :clickOutside="false" class="project-mod project-p">
@@ -144,7 +172,7 @@
 			<ProjectForm v-if="tabs === 'edit'" ref="projectForm" :projectItem="projectItem" @setFields="setFields" />
 			<RateView v-if="tabs === 'rating' && (rates || archiveRates)" :title="projectItem.title" :rates="rates" :archiveRates="archiveRates" :userRole="storeAuth.userData.userRole" />
 		</div>
-		<RateForm v-if="['expert', 'expertSpecComp'].includes(storeAuth.userData.userRole)" :expertRates="expertRates" @sendRate="sendRate" />
+		<RateForm v-if="['expert', 'expertSpecComp'].includes(storeAuth.userData.userRole) && rateArr.length" :rateArr="rateArr" :expertRates="expertRates" @sendRate="sendRate" />
 		<Teleport to="body">
 			<transition name="fadeUp">
 				<SuccessMod v-if="rateSuccess" @closeModal="closeProjectMod" :title="rateSuccessTitle" />

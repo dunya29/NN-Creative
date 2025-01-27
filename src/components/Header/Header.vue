@@ -66,7 +66,7 @@
 					<nav :class="['menu', isMobMenuOpen && 'show']">
 						<ul>
 							<li>
-								<RouterLink to="/projects" class="h6" @click="() =>isMobMenuOpen = false">Проектный офис</RouterLink>
+								<RouterLink to="/projects" class="h6" @click="() =>isMobMenuOpen = false">{{storeAuth.userData.userRole === 'manager' ? 'Проектный офис' : 'Личный кабинет'}}</RouterLink>
 							</li>
 							<li v-if="storeAuth.userData.userRole === 'manager'">
 								<RouterLink to="/register" class="h6" @click="() =>isMobMenuOpen = false">Реестр</RouterLink>

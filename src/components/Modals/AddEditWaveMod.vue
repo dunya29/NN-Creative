@@ -4,12 +4,13 @@
 	import Modal from '../Common/Modal.vue'
 	import { useDateModule } from '@/module/dateModule'
 	const props = defineProps({
+		waves: Array,
 		name: String,
 		start: String,
 		end: String,
 		title: String,
+		disabledDates: Array,
 	})
-
 	const emit = defineEmits(['closeModal', 'editWave'])
 	const loading = ref(false)
 	const {
@@ -19,7 +20,9 @@
 		setEndLowerLimit,
 		formatDateValue,
 		parseDateValue,
+		disabledDates
 	} = useDateModule()
+	const disabeledDatesArr = computed(() => props.disabledDates ? disabledDates(props.disabledDates) : disabledDates(props.waves))
 	const endLowerLimit = computed(() => setEndLowerLimit(fields[1].value))
 	const fields = reactive([
 		{
@@ -88,14 +91,14 @@
 			<div class="form__fieldset">
 				<div class="h6">Начало</div>
 				<div :class="['item-form item-form--date',fields[1].error && 'error']">
-					<Datepicker v-model="fields[1].value" :locale="locale" :inputFormat="format" :placeholder="placeholder" :lowerLimit="new Date()" @closed="onStartDateChange" />
+					<Datepicker v-model="fields[1].value" :locale="locale" :inputFormat="format" :placeholder="placeholder" :lowerLimit="new Date()" :disabledDates="{ dates: disabeledDatesArr}" @closed="onStartDateChange" />
 					<div data-error="" v-if="fields[1].error">{{ fields[1].errorTxt }}</div>
 				</div>
 			</div>
 			<div class="form__fieldset">
 				<div class="h6">Конец</div>
 				<div :class="['item-form item-form--date',fields[2].error && 'error']">
-					<Datepicker v-model="fields[2].value" :locale="locale" :inputFormat="format" :placeholder="placeholder" :lowerLimit="endLowerLimit" />
+					<Datepicker v-model="fields[2].value" :locale="locale" :inputFormat="format" :placeholder="placeholder" :lowerLimit="endLowerLimit" :disabledDates="{ dates: disabeledDatesArr }" />
 					<div data-error="" v-if="fields[2].error">{{ fields[2].errorTxt }}</div>
 				</div>
 			</div>

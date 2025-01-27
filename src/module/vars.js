@@ -1,3 +1,7 @@
+export const fetchErrors = {
+    verify: "Аккаунт пользователя не подтвержден!",
+    forbidden: "Вы заблокированы и не можете войти!"
+}
 export const usersArr = [
     { name: 'Менеджер', value: 'manager' },
     { name: 'Пользователь', value: 'user' },
@@ -5,38 +9,9 @@ export const usersArr = [
     { name: 'Рабочая группа', value: 'workingGroup' },
     { name: "Эксперт спецконкурса", value: 'expertSpecComp'}
 ]
-export const directionArr = [
-    { name: 'Спецконкурс. 80 - летие Великой Победы', value: '8' },
-    { name: '80 - летие Великой Победы', value: '1' },
-    { name: 'Гастрономия', value: '2' },
-    { name: 'Изобразительное искусство', value: '3' },
-    { name: 'Исполнительское искусство', value: '4' },
-    { name: 'Кино', value: '5' },
-    { name: 'Мода', value: '6' },
-    { name: 'Ремесло', value: '7' },
-]
 export const booleanArr = [
     { name: 'Да', value: true },
     { name: 'Нет', value: false },
-]
-export const granteeArr = [
-    {
-        name: "Юридическое лицо, зарегистрированное на территории Нижегородской области",
-        value: "1"
-    },
-    {
-        name: "ИП, зарегистрированный на территории Нижегородской области",
-        value: "2"
-    },
-    {
-        name: "Физическое лицо, зарегистрированное на территории Нижегородской области",
-        value: "3"
-
-    },
-    {
-        name: "Самозанятый, зарегистрированный на территории Нижегородской области",
-        value: "4"
-    }
 ]
 export const projectFieldsArr = [
     {
@@ -64,20 +39,18 @@ export const projectFieldsArr = [
     },
     {
         name: "Направление",
-        value: "1",
+        value: "",
         type: "select",
         translitName: "direction",
         required: true,
         error: false,
-        errorTxt: "Заполните поле",
-        data: [...directionArr]
+        errorTxt: "Заполните поле"
     },
     {
         name: "Грантополучатель",
         value: "1",
         translitName: "grantee",
-        type: "radio",
-        data: [...granteeArr]
+        type: "radio"
     },
     {
         name: "Сумма грантовых средств, запрашиваемая для реализации проекта",
@@ -158,7 +131,8 @@ export const projectFieldsArr = [
         type: "html",
         required: true,
         error: false,
-        errorTxt: "Заполните поле"
+        errorTxt: "Заполните поле",
+        notyTxt: "Если вы участвуете в специальной грантовой поддержке культурных проектов, посвящённых 80-летию Великой Победы, в этом поле можете поставить прочерк."
     },
     {
         name: "Наличие экономического эффекта. Косвенные экономические эффекты",
@@ -167,7 +141,8 @@ export const projectFieldsArr = [
         type: "html",
         required: true,
         error: false,
-        errorTxt: "Заполните поле"
+        errorTxt: "Заполните поле",
+        notyTxt: "Если вы участвуете в специальной грантовой поддержке культурных проектов, посвящённых 80-летию Великой Победы, в этом поле можете поставить прочерк."
     },
     {
         name: "Смета",
@@ -246,6 +221,7 @@ export const projectFieldsArr = [
     },
     {
         name: "Рекомендатели проекта",
+        label: "можно загузить несколько файлов",
         value: [],
         translitName: "recommenders",
         type: "file",
@@ -433,7 +409,10 @@ export const projectGranteeFieldsArr = [
                     types: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
                     format: ".pdf, .doc, .docx",
                     size: 5 * 1024 * 1024
-                }
+                },
+                required: true,
+                error: false,
+                errorTxt: "Выберите файл"
             },
             {
                 name: "Свидетельство о государственной регистрации юридического лица в Едином государственном реестре юридических лиц (ЕГРЮЛ)",
@@ -635,55 +614,5 @@ export const projectGranteeFieldsArr = [
             },
         ]
     },
-]
-export const rateArr = [
-    {
-        "name": "Актуальность проекта",
-        "shortName": "Актуальность",
-        "translitName": "relevance",
-        "value": 1
-    },
-    {
-        "name": "Уникальность проекта",
-        "shortName": "Уникальность",
-        "translitName": "uniqueness",
-        "value": 1
-    },
-    {
-        "name": "Реалистичность проекта",
-        "shortName": "Реалистичность",
-        "translitName": "feasibility",
-        "value": 1
-    },
-    {
-        "name": "Наличие соц-культ. эффектов",
-        "shortName": "Соц.культурный эффект",
-        "translitName": "socioCultImpact",
-        "value": 1
-    },
-    {
-        "name": "Наличие экономического эффекта",
-        "shortName": "Экономический эффект",
-        "translitName": "economicImpact",
-        "value": 1
-    },
-    {
-        "name": "Потенциал и компетенции команды проекта",
-        "shortName": "Компетенции команды",
-        "translitName": "teamPotential",
-        "value": 1
-    },
-    {
-        "name": "Влияние проекта на креативные сообщества",
-        "shortName": "Влияния на сообщества",
-        "translitName": "impactOnCreativeComm",
-        "value": 1
-    },
-    {
-        "name": "Собственный вклад команды в проект",
-        "shortName": "Собственный вклад",
-        "translitName": "teamsContribution",
-        "value": 1
-    }
 ]
 export const monthArr = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']

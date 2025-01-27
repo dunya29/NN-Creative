@@ -274,6 +274,10 @@
             {
                 "name": "file.pdf",
                 "url": "projects/file.pdf"
+            },
+            {
+                "name": "file.pdf",
+                "url": "projects/file.pdf"
             }
         ],
         "videoURL": "https://disk.yandex.ru/i/aBcDeFg12345",

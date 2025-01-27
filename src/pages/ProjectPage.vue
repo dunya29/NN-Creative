@@ -1,10 +1,11 @@
 <script setup>
-	import { provide, ref, useTemplateRef } from 'vue'
+	import { provide, ref, useTemplateRef, onBeforeMount} from 'vue'
 	import { useRouter } from 'vue-router'
 	import ProjectForm from '@/components/Projects/ProjectForm.vue'
 	import ProjectTop from '@/components/Projects/ProjectTop.vue'
 	import { projectFieldsArr, projectGranteeFieldsArr } from '@/module/vars'
 	import PageWrap from '@/components/PageWrap.vue'
+	import { useProjectModule } from '@/module/projectModule'
 	const fields = ref([
 		[...projectFieldsArr],
 		[...projectGranteeFieldsArr[0].data],
@@ -17,7 +18,9 @@
 	const closeProjectMod = () => {
 		router.push('/projects')
 	}
-	console.log("dkjdjdj")
+	onBeforeMount(() => {
+		useProjectModule()
+	})
 	provide('closeProjectMod', closeProjectMod)
 </script>
 <template>

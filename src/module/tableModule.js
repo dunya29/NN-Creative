@@ -1,7 +1,7 @@
 import { computed, onBeforeMount, ref, watch } from "vue"
 import { useRoute } from "vue-router"
-import { booleanArr, directionArr } from "./vars"
-import { projectsApi } from "@/api/api"
+import { booleanArr } from "./vars"
+import { projectsApi, wavesApi } from "@/api/api"
 import { useCommonStore } from "@/store/common"
 
 export const useTableModule = (userRole = false, fetchItems = false) => {
@@ -92,10 +92,12 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 		queryParams.value.limit = limit
 		return search
 	})
-	let filterStatusArr = computed(()=>[{ name: 'Все', value: '' }, ...storeCommon.statusArr])
-	const filterDirectionArr = computed(() => [{ name: 'Все', value: '' }, ...directionArr])
-	const filterBooleanArr = computed(() => [{ name: 'Все', value: '' }, ...booleanArr])
+	const waves = ref([])
 	const years = ref([])
+	const filterStatusArr = computed(() => [{ name: 'Все', value: '' }, ...storeCommon.statusArr])
+	const filterDirectionArr = computed(() => [{ name: 'Все', value: '' }, ...storeCommon.directionArr])
+	const filterBooleanArr = computed(() => [{ name: 'Все', value: '' }, ...booleanArr])
+	const filterWavesArr = computed(() => [{ name: 'Все', value: '' }, ...(waves.value.length ? waves.value.map(item => ({ name: item.name, value: item.id })) : [])])
 	const setQuery = (query) => {
 		query.forEach(item => {
 			let key = item[0]
@@ -137,10 +139,22 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 		filters.value.year = value
 		setPage(1)
 	}
+	const waveOnChange = (undefined, value) => {
+		filters.value.wave = value
+		setPage(1)
+	}
 	const fetchYears = async () => {
 		try {
 			const { data } = await projectsApi.getYears()
 			years.value = [...data]
+		} catch (err) {
+			console.log(err)
+		}
+	}
+	const fetchWaves = async () => {
+		try {
+			const { data } = await wavesApi.getItems()
+			waves.value = [...data]
 		} catch (err) {
 			console.log(err)
 		}
@@ -152,7 +166,7 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 		return filters.value.sortBy === param ? true : false
 	}
 	onBeforeMount(async () => {
-		if (window.location.search) {
+		if (window.location.search && ['projects', 'search'].includes(route.name)) {
 			let query = Object.entries(route.query)
 			setQuery(query)
 		}
@@ -161,6 +175,9 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 			if (!filters.value.year && years.value.length) {
 				filters.value.year = years.value[0].value
 			}
+		}
+		if (['projects', 'search'].includes(route.name) && ['manager', 'expert', 'expertSpecComp'].includes(userRole) || ['register'].includes(route.name)) {
+			fetchWaves()
 		}
 		count.value = await fetchItems()
 		isMounted.value = true
@@ -181,5 +198,5 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 			}
 		},
 		{ deep: true })
-	return { isMounted, years, filters, params, queryParams, locationSearch, filterStatusArr, filterDirectionArr, filterBooleanArr, setQuery, statusOnChange, directionOnChange, setOrder, expertSeenOnChange, wgSeenOnChange, yearOnChange, setPage, checkSortParam }
+	return { isMounted, years, filters, params, queryParams, locationSearch, filterWavesArr, filterStatusArr, filterDirectionArr, filterBooleanArr, setQuery, statusOnChange, directionOnChange, setOrder, expertSeenOnChange, wgSeenOnChange, yearOnChange, waveOnChange, setPage, checkSortParam }
 }

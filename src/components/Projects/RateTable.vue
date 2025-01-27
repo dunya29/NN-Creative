@@ -1,13 +1,14 @@
 <script setup>
-	import { rateArr } from '@/module/vars'
+	import { inject } from 'vue'
 	import ReadMore from '../Common/ReadMore.vue'
 	import simplebar from 'simplebar-vue'
 	const props = defineProps({
+		rateArr: Array,
 		rates: Array,
 		userRole: String,
 	})
+	const rateArr = inject('rateArr')
 </script>
-
 <template>
 	<simplebar>
 		<table>

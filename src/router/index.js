@@ -21,37 +21,51 @@ const router = createRouter({
         { path: '/register', name: 'register', component: () => import('../pages/RegisterPage.vue'), meta: { title: 'Реестр - Команда Креативных Практик', requiresAuth: true, requiresManager: true } },
         { path: '/notifications', name: 'notifications', component: () => import('../pages/NotificationsPage.vue'), meta: { title: 'Уведомления - Команда Креативных Практик', requiresAuth: true } },
         { path: '/verify', name: 'verify', component: () => import('../pages/VerifyPage.vue'), meta: { title: 'Верификация - Команда Креативных Практик' } },
+        { path: '/verify-success', name: 'verify-success', component: () => import('../pages/VerifySuccessPage.vue'), meta: { title: 'Верификация - Команда Креативных Практик' } },
         { path: '/forbidden', name: 'forbidden', component: () => import('../pages/ForbiddenPage.vue'), meta: { title: 'Доступ ограничен - Команда Креативных Практик' } },
-        { path: '/access-denied', name: 'access-denied', component: () => import('../pages/AccessDeniedPage.vue'), meta: { title: 'Доступ ограничен - Команда Креативных Практик' } },
-        { path: '/:pathMatch(.*)*', name: 'notfound', component: () => import('../pages/NotFoundPage.vue'), meta: { title: 'Страница не найдена - Команда Креативных Практик' } }
+        { path: '/access-denied', name: 'access-denied', component: () => import('../pages/AccessDeniedPage.vue'), meta: { title: 'Доступ ограничен - Команда Креативных Практик', requiresAuth: true } },
+        { path: '/:pathMatch(.*)*', name: 'notfound', component: () => import('../pages/NotFoundPage.vue'), meta: { title: 'Страница не найдена - Команда Креативных Практик', requiresAuth: true } }
     ],
     linkActiveClass: 'current',
     linkExactActiveClass: 'current'
 })
 router.beforeEach(async (to, from) => {
-    if (to.meta.requiresAuth && !useAuthStore().logged) {
-        await useAuthStore().authMe()
-        if (!useAuthStore().logged) {
-            if (!['home', 'login'].includes(to.name)) {
-                return {
-                    path: '/login',
-                    query: { redirect: to.fullPath },
+    if (to.meta.requiresAuth && !useAuthStore().isAuthorized) {
+        try {
+            await useAuthStore().authMe()
+            if (!useAuthStore().isAuthorized) {
+                if (!['home', 'login', 'notfound'].includes(to.name)) {
+                    return {
+                        path: '/login',
+                        query: { redirect: to.fullPath },
+                    }
+                } else {
+                    return {
+                        path: '/login'
+                    }
                 }
-            } else {
+            } else if (useAuthStore().isAuthorized && to.name === 'home') {
                 return {
-                    path: '/login'
+                    path: '/projects'
                 }
             }
-        } else if (useAuthStore().logged && to.name === 'home') {
+        } catch (err) {
+            console.log(err)
             return {
-                path: '/projects'
+                path: '/login'
             }
-        } 
+        }
     }
-    if (to.meta.requiresAuth && useAuthStore().logged) {
+    if (to.meta.requiresAuth && useAuthStore().isAuthorized) {
         if (to.name != 'verify' && !useAuthStore().userData.emailVerified) {
             return {
-                path: '/verify'
+                path: '/verify',
+                query: { email: useAuthStore().userData.email }
+            }
+        }
+        if (to.name === 'verify' && useAuthStore().userData.emailVerified) {
+            return {
+                path: '/projects'
             }
         }
         if (to.name != 'forbidden' && useAuthStore().userData.disable) {
@@ -74,6 +88,23 @@ router.beforeEach(async (to, from) => {
                 path: '/access-denied'
             }
         }
+    }
+    if (to.name === 'recovery' && !to.query.token) {
+        return {
+            path: '/forgot-password'
+        }
+    }
+    if (to.name === 'verify-success' && (!to.query.email || !to.query.token)) {
+        if (to.query.email) {
+            return {
+                path: '/verify',
+                query: { email: to.query.email}
+            }
+        } else {
+            return {
+                path: '/login'
+            }
+        } 
     }
 });
 router.afterEach((to) => {

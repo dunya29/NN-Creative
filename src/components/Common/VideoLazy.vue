@@ -3,7 +3,7 @@
 	import { onMounted, ref } from 'vue'
 
 	const props = defineProps({
-		poster: String,
+		poster: Array,
 		videoURL: Object,
 		muted: Boolean,
 	})
@@ -19,7 +19,7 @@
 </script>
 <template>
 	<div class="video-lazy media-cover" :class="[loaded && 'loaded', !loaded && 'loading']">
-		<video controls="" :src="getVideoURL(videoURL.url)" :muted="muted || true" playsinline="" loop="" ref="videoRef"></video>
-		<img :src="getImageURL(poster,1187)" alt="" loading="lazy" />
+		<video controls="" :src="getVideoURL(videoURL)" :muted="muted || true" playsinline="" loop="" ref="videoRef"></video>
+		<img :src="getImageURL(poster)" :alt="poster.name" loading="lazy" />
 	</div>
 </template>

@@ -136,6 +136,9 @@
         max-width: var(--container-width);
         transform: translateX(-50%);
         z-index: 2;
+        &.unshow {
+            pointer-events: none;
+        }
         .project-p__inner {
             display: flex;
             align-items: center;
@@ -393,6 +396,13 @@
         padding: 16px 20px;
         &:first-child {
             border-right: 1px solid #eaeaea;
+            span a {
+                color: var(--primary-color);
+                display: block;
+                &:hover {
+                    color: var(--primary-color-hover);
+                }
+            }
         }
     }
     &__lbl {
@@ -475,7 +485,26 @@
             }
         }
     }
+    &__noty {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+        gap: 4px;
+        align-items: start;
+        p {
+            font-weight: 600;
+            color: var(--primary-color);
+            align-self: center;
+        }
+        svg {
+            fill: var(--primary-color);
+        }
+    }
     @media (max-width: vars.$bp1) {
+        &__noty {
+            p {
+                font-size: 14px;
+            }
+        }
         &__image {
             max-width: 482px;
         }

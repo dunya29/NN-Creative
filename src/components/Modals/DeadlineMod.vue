@@ -7,19 +7,19 @@
 		loading: Boolean,
 	})
 	const emit = defineEmits(['closeModal', 'setDeadline'])
-	const { locale, format, placeholder } = useDateModule()
+	const { locale, format, placeholder, setDeadline } = useDateModule()
 	const field = reactive({
 		value: new Date(),
 		required: true,
 		error: false,
 		errorTxt: 'Укажите дату',
 	})
-	const onSubmit = async () => {
+	const onSubmit = async () => {	
 		if (field.required) {
 			field.error = field.value ? false : true
 		}
 		if (!field.error) {
-			emit('setDeadline', field.value.toISOString())
+			emit('setDeadline', setDeadline(field.value))
 		}
 	}
 </script>

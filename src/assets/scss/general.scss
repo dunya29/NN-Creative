@@ -458,6 +458,11 @@ p {
                 url(../images/icons/date.svg) center right 11px / 21px 20px no-repeat,
                 var(--primary-bg-light-color);
         }
+        &.error input {
+            background:
+                url(../images/icons/date.svg) center right 11px / 21px 20px no-repeat,
+                var(--error-bg-color);
+        }
     }
     &--vk {
         input {
@@ -486,7 +491,7 @@ p {
         height: 24px;
         display: block;
         position: absolute;
-        top: 8px;
+        top: 10px;
         right: 12px;
         cursor: pointer;
         svg {
@@ -552,6 +557,12 @@ p {
                 stroke: var(--text-white);
                 stroke-dasharray: 30px;
                 stroke-dashoffset: 30px;
+            }
+        }
+        a {
+            color: var(--primary-color);
+            &:hover {
+                color: var(--primary-color-hover);
             }
         }
     }
@@ -676,6 +687,7 @@ p {
         align-items: center;
         justify-content: space-between;
         position: relative;
+        margin-top: 5px;
     }
     &__name {
         margin-right: 16px;
@@ -910,7 +922,7 @@ p {
         background: var(--primary-bg-color);
         visibility: hidden;
         opacity: 0;
-        transition: all .3s linear;
+        transition: all 0.3s linear;
         pointer-events: none;
     }
 }

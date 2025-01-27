@@ -6,12 +6,12 @@
 	import Play from '../Icons/Play.vue'
 	import Bin from '../Icons/Bin.vue'
 	import Handle from '../Icons/Handle.vue'
-	import { getImageURL, getImageWebpURL } from '@/functions/getURL'
+	import { getImageURL } from '@/functions/getURL'
 
 	const props = defineProps({
 		id: Number,
-		imageURL: String,
-		videoURL: String,
+		imageURL: Object,
+		videoURL: Object,
 		userRole: String,
 	})
 	const emit = defineEmits(['delVideo'])
@@ -36,7 +36,7 @@
 <template>
 	<div class="doc-video">
 		<div class="media-cover video" @click="() => showModal = true">
-			<img :src="getImageURL(imageURL,548)" alt="" loading="lazy" @load="imageLoading = true">
+			<img :src="getImageURL(imageURL)" :alt="imageURL.name" loading="lazy" @load="imageLoading = true">
 			<div class="play-btn" v-if="imageLoading">
 				<Play />
 			</div>

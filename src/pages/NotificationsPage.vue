@@ -3,12 +3,10 @@
 	import PageWrap from '@/components/PageWrap.vue'
 	import Pagination from '@/components/Common/Pagination.vue'
 	import { useTableModule } from '@/module/tableModule'
-	import { useAuthStore } from '@/store/auth'
 	import { useRouter } from 'vue-router'
 	import NotificationCard from '@/components/Notifications/NotificationCard.vue'
 	import { notificationsApi } from '@/api/api'
 	const router = useRouter()
-	const storeAuth = useAuthStore()
 	const notifications = ref([])
 	const readNotifications = ref([])
 	const unReadNotifications = ref([])
@@ -18,7 +16,6 @@
 		try {
 			loading.value = true
 			const { data } = await notificationsApi.getItems(
-				storeAuth.userData.id,
 				{
 					...params.value,
 				}
@@ -45,7 +42,7 @@
 	)
 	const onRead = async id => {
 		try {
-			await notificationsApi.editItem(storeAuth.userData.id, id, {
+			await notificationsApi.editItem(id, {
 				isRead: true,
 			})
 		} catch (err) {

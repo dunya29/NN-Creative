@@ -44,12 +44,12 @@
 				changedItemsArr = [...items.slice(oldIndex + 1, newIndex + 1)].map(
 					item => ({
 						id: item.id,
-						params: { orderId: item.orderId - 1 },
+						params: { orderId: Number(item.orderId) - 1 },
 					})
 				)
 			} else {
 				changedItemsArr = [...items.slice(newIndex, oldIndex)].map(
-					item => ({ id: item.id, params: { orderId: item.orderId + 1 } })
+					item => ({ id: item.id, params: { orderId: Number(item.orderId) + 1 } })
 				)
 			}
 			sortDocs(thisItem, changedItemsArr, api)
@@ -70,8 +70,6 @@
 			console.log(err)
 		}
 	}
-
-	//let videoAddController
 	const addVideo = async (data, reset, callback) => {
 		try {
 			await docsVideoApi.postItem(data)
@@ -102,7 +100,6 @@
 			console.log(err)
 		}
 	}
-	//let docAddController
 	const addDoc = async (data, reset, callback) => {
 		try {
 			await docsApi.postItem(data)
@@ -125,26 +122,15 @@
 		}
 	}
 	const sortDocs = async (thisItem, changedItemsArr, api) => {
-		let sortFetchCount = 0
-		let updateCount = changedItemsArr.length + 1
+		let orderArr = [{id:thisItem.id, orderId: thisItem.orderId}, ...changedItemsArr.map(item => ({id: item.id, ...item.params}))]
 		try {
-			await api.sort(thisItem.id, {
-				orderId: thisItem.orderId,
-			})
-			sortFetchCount++
-			changedItemsArr.forEach(async item => {
-				try {
-					await api.sort(item.id, item.params)
-					sortFetchCount++
-					if (sortFetchCount === updateCount) {
-						fetchDocs()
-						sortFetchCount = 0
-					}
-				} catch (err) {
-					console.log(err)
-				}
-			})
-		} catch (err) {
+			await api.sort({order: JSON.stringify(orderArr)})
+			if (api === docsVideoApi) {
+				fetchVideo()
+			} else if (api === docsApi) {
+				fetchDocs()
+			}		
+		} catch(err) {
 			console.log(err)
 		}
 	}
@@ -188,7 +174,7 @@
 							</div>
 							<SlickList axis="xy" v-model:list="videoList" :class="['mb-60 docs-p__video',isDragging && 'isDragging']" @sort-start="isDragging = true" @sort-end="videoSortEnd" useDragHandle>
 								<SlickItem v-for="(item, i) in videoList" :key="item.id" :index="i">
-									<DocVideo :id="item.id" :imageURL="item.imageURL" :videoURL="item.videoURL" :userRole="storeAuth.userData.userRole" @delVideo="delVideo" />
+									<DocVideo :id="item.id" :imageURL="item.imageURL[0]" :videoURL="item.videoURL[0]" :userRole="storeAuth.userData.userRole" @delVideo="delVideo" />
 								</SlickItem>
 							</SlickList>
 						</div>
@@ -204,7 +190,7 @@
 							</div>
 							<SlickList axis="y" v-model:list="docList" :class="['docs-p__table',isDragging && 'isDragging']" @sort-start="isDragging = true" @sort-end="docSortEnd" useDragHandle tag="table">
 								<SlickItem v-for="(item, i) in docList" :key="item.id" :index="i" tag="tr" class="item-doc">
-									<Doc :id="item.id" :name="item.name" :docURL="item.docURL" :userRole="storeAuth.userData.userRole" @delDoc="delDoc" />
+									<Doc :id="item.id" :name="item.name" :docURL="item.docURL[0]" :userRole="storeAuth.userData.userRole" @delDoc="delDoc" />
 								</SlickItem>
 							</SlickList>
 						</div>

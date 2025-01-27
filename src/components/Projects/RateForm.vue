@@ -4,23 +4,23 @@
 	import Tiptap from '../Wysiwyg/Tiptap.vue'
 	import Plus from '../Icons/Plus.vue'
 	import Minus from '../Icons/Minus.vue'
-	import { rateArr } from '@/module/vars'
 	import { useAuthStore } from '@/store/auth'
 	import simplebar from 'simplebar-vue'
 	const props = defineProps({
+		rateArr: Array,
 		expertRates: Object,
 	})
 	const emit = defineEmits(['sendRate'])
 	const storeAuth = useAuthStore()
 	const sendRateLoading = ref(false)
-	const rateFields = ref(rateArr)
+	const rateFields = ref(props.rateArr)
 	const showComm = ref(false)
 	const expComm = ref('')
 	const inpOnChange = (idx, value) => {
-		if (value > 1) {
+		if (value > 0) {
 			rateFields.value[idx].value = value > 10 ? 10 : Math.round(value)
 		} else {
-			rateFields.value[idx].value = 1
+			rateFields.value[idx].value = 0
 		}
 	}
 	const onSubmit = async () => {
@@ -46,7 +46,7 @@
 			rateFields.value.forEach(item => {
 				let key = item.translitName
 				if (props.expertRates.hasOwnProperty(key)) {
-					item.value = props.expertRates[key]
+					item.value = Number(props.expertRates[key])
 				}
 			})
 			expComm.value = props.expertRates.comment || ''
@@ -84,11 +84,11 @@
 					<div class="project-rate__item" v-for="(item,idx) in rateFields" :key="idx">
 						<div class="item-rate">
 							<div class="quantity">
-								<button class="quantity__btn" :disabled="item.value === 1" @click="() => item.value--">
+								<button class="quantity__btn" :disabled="item.value <= 0" @click="() => item.value--">
 									<Minus />
 								</button>
 								<input type="number" v-model="item.value" @change="e => inpOnChange(idx, e.target.value)">
-								<button class="quantity__btn" :disabled="item.value === 10" @click="() => item.value++">
+								<button class="quantity__btn" :disabled="item.value >= 10" @click="() => item.value++">
 									<Plus />
 								</button>
 							</div>

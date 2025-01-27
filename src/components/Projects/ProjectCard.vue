@@ -9,7 +9,6 @@
 	const props = defineProps({
 		role: String,
 		data: Object,
-		filterStatusArr: Array,
 	})
 	const emit = defineEmits(['openProject'])
 	const { formatDateValue } = useDateModule()
@@ -19,15 +18,17 @@
 		<td class="center">{{ data.id }}</td>
 		<td>
 			<div :class="['media-cover', !data.imageURL.length && 'no-photo']">
-				<img v-if="data.imageURL.length" :src="getImageURL(data.imageURL[0].url,191)" :alt="data.title" loading="lazy">
+				<img v-if="data.imageURL.length" :src="getImageURL(data.imageURL[0])" :alt="data.title" loading="lazy">
 			</div>
 		</td>
 		<td>
 			<h5>{{ data.title }}</h5>
 		</td>
-		<td class="center" v-if="['manager', 'expert', 'expertSpecComp'].includes(role)">{{ data.wave }}</td>
+		<td class="center" v-if="['manager', 'expert', 'expertSpecComp'].includes(role)">
+			{{ data.wave ? data.wave.name : '-'}}
+		</td>
 		<td v-if="['expert', 'expertSpecComp'].includes(role)">
-			<span>{{ data.direction.name }}</span>
+			<span v-if="data.direction">{{ data.direction.name }}</span>
 		</td>
 		<td class="center" v-if="['manager', 'expert','expertSpecComp'].includes(role)">{{ data.point || '-'}}</td>
 		<td v-if="['manager','user'].includes(role)">

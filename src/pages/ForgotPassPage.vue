@@ -1,36 +1,38 @@
 <script setup>
-	import { useRouter } from 'vue-router'
+	import { ref } from 'vue'
 	import { useForm } from 'vee-validate'
 	import { authApi } from '@/api/api'
-	import { isEmail } from '@/functions/validation'
+	import { useFormModule } from '@/module/formModule'
 	import LoginWrap from '@/components/Login/LoginWrap.vue'
 	import PageWrap from '@/components/PageWrap.vue'
+	import SuccessMod from '@/components/Modals/SuccessMod.vue'
+	import ErrorMod from '@/components/Modals/ErrorMod.vue'
 
+	const { onError, errorTitle, emailValidate, formOnError } = useFormModule()
 	const schema = {
-		email: async val => {
-			if (val) {
-				if (isEmail(val)) {
-					return true
-				} else {
-					return 'Некорректный E-mail'
-				}
-			} else {
-				return 'Заполните поле'
-			}
-		},
+		email: val => emailValidate(val),
 	}
-	const { errors, handleSubmit, isSubmitting, defineField } = useForm({
+	const {
+		errors,
+		handleSubmit,
+		isSubmitting,
+		handleReset,
+		defineField,
+		setFieldError,
+	} = useForm({
 		validationSchema: schema,
 	})
 	const [email, emailAttrs] = defineField('email')
 
-	const router = useRouter()
+	const onSuccess = ref(false)
 	const onSubmit = handleSubmit(async values => {
 		try {
 			await authApi.forgotPassword(values.email)
-			router.push('/recovery')
+			onSuccess.value = true
+			handleReset()
 		} catch (err) {
 			console.log(err)
+			formOnError(err, values, setFieldError)
 		}
 	})
 </script>
@@ -57,5 +59,15 @@
 				</div>
 			</form>
 		</LoginWrap>
+		<Teleport to="body">
+			<transition name="fadeUp">
+				<SuccessMod v-if="onSuccess" @closeModal="() => onSuccess = false" title="Ссылка для восстановления пароля отправлена на ваш email." />
+			</transition>
+		</Teleport>
+		<Teleport to="body">
+			<transition name="fadeUp">
+				<ErrorMod v-if="onError" @closeModal="() => onError = false" :title="errorTitle"/>
+			</transition>
+		</Teleport>
 	</PageWrap>
 </template>

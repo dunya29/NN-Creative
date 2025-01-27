@@ -6,11 +6,10 @@
 	import Eye from '../Icons/Eye.vue'
 	import Handle from '../Icons/Handle.vue'
 	import DocIcon from '../Icons/DocIcon.vue'
-	import { getFileURL } from '@/functions/getURL'
 	const props = defineProps({
 		id: Number,
 		name: String,
-		docURL: String,
+		docURL: Object,
 		userRole: String,
 	})
 	const emit = defineEmits(['delDoc'])
@@ -33,7 +32,7 @@
 		<h5>{{ name }}</h5>
 	</td>
 	<td class="page-icons">
-		<a class="page-icon" :href="getFileURL(docURL)" target="_blank">
+		<a class="page-icon" :href="docURL.url" target="_blank">
 			<Eye />
 		</a>
 		<button class="page-icon" @click="() => delModal = true" v-if="userRole === 'manager'">

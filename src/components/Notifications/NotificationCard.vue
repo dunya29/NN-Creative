@@ -23,8 +23,8 @@
 	<div :class="['item-notification', !item.isRead && 'unread']">
 		<div class="item-notification__date">Сообщение {{formatUTCDate(item.timestamp)}}</div>
 		<div class="item-notification__row">
-			<div class="media-cover" @click="()=> onRead()">
-				<img :src="getImageURL(item.imageURL[0].url)" :alt="item.title" loading="lazy">
+			<div :class="['media-cover', !item.imageURL.length && 'no-photo' ]" @click="()=> onRead()">
+				<img v-if="item.imageURL.length" :src="getImageURL(item.imageURL[0])" :alt="item.title" loading="lazy">
 			</div>
 			<h6 @click="() => onRead()">
 				{{ item.title }}

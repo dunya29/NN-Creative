@@ -18,10 +18,12 @@
 <template>
 	<PageWrap>
 		<ProjectsWrap>
-			<template #default="{role, years, activeYear, yearOnChange}">
+			<template #default="{userName, role, years, activeYear, yearOnChange}">
 				<div :class="['sec-top projects__top', `projects__top--${role}` ]">
 					<div class="sec-top__left">
-						<h1>Проектный офис</h1>
+						<h1 v-if="role === 'workingGroup'">Рабочая группа</h1>
+						<h1 v-else-if="role === 'manager'">Проектный офис</h1>
+						<h1 v-else>{{ userName }}</h1> 
 						<div class="projects__years" v-if="years && years.length">
 							<button :class="['btn', activeYear == item.value ? 'main-btn' : 'stroke-btn']" v-for="(item,idx) in years" :key="idx" @click="() => yearOnChange(item.value)"><span>{{item.value}}</span></button>
 						</div>

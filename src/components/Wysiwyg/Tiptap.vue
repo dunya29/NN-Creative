@@ -79,7 +79,7 @@
 			if (!props.modelValue) {
 				editor.value.commands.clearContent()
 			} else {
-				if(editor.value.getHTML() !== props.modelValue) {
+				if (editor.value.getHTML() !== props.modelValue) {
 					editor.value.commands.setContent(props.modelValue)
 				}
 			}
@@ -100,6 +100,20 @@
 						<path d="M13.6 9.4C15.3 9.7 16.8 10.3 18.2 11.4L21 8.5V15.5H14L16.7 12.8C13 10.1 7.9 11 5.3 14.7C5.1 15 4.9 15.2 4.8 15.5L3 14.6C5.1 10.8 9.3 8.7 13.6 9.4Z" />
 					</svg>
 				</button>
+				<TiptapDrop title="Заголовок">
+					<button @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 1 }) }">
+						H1
+					</button>
+					<button @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 2 }) }">
+						H2
+					</button>
+					<button @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 3 }) }">
+						H3
+					</button>
+					<button @click="editor.chain().focus().toggleHeading({ level: 4 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 4 }) }">
+						H4
+					</button>
+				</TiptapDrop>
 				<button @click="editor.chain().focus().toggleBold().run()" :class="{ 'is-active': editor.isActive('bold') }">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<path d="M15.2504 11.8C15.74 11.5018 16.1532 11.0934 16.4571 10.6073C16.7609 10.1212 16.9469 9.57077 17.0004 9C17.0097 8.48388 16.9172 7.971 16.7282 7.49063C16.5392 7.01027 16.2575 6.57184 15.899 6.20039C15.5406 5.82894 15.1124 5.53174 14.6391 5.32578C14.1658 5.11981 13.6565 5.00911 13.1404 5H6.65039V19H13.6504C14.1415 18.9948 14.6269 18.8929 15.0786 18.7001C15.5304 18.5073 15.9397 18.2274 16.2833 17.8764C16.6269 17.5253 16.898 17.1101 17.0811 16.6543C17.2642 16.1985 17.3557 15.7112 17.3504 15.22V15.1C17.3507 14.4071 17.1533 13.7285 16.7813 13.144C16.4093 12.5594 15.8782 12.0931 15.2504 11.8ZM8.65039 7H12.8504C13.2766 6.98681 13.6966 7.10428 14.0541 7.33665C14.4116 7.56902 14.6894 7.90517 14.8504 8.3C15.0133 8.82779 14.9606 9.39859 14.7039 9.88765C14.4472 10.3767 14.0073 10.7443 13.4804 10.91C13.2758 10.97 13.0636 11.0003 12.8504 11H8.65039V7ZM13.2504 17H8.65039V13H13.2504C13.6766 12.9868 14.0966 13.1043 14.4541 13.3367C14.8116 13.569 15.0894 13.9052 15.2504 14.3C15.4133 14.8278 15.3606 15.3986 15.1039 15.8877C14.8472 16.3767 14.4073 16.7443 13.8804 16.91C13.6758 16.97 13.4636 17.0003 13.2504 17Z" />
@@ -137,20 +151,6 @@
 						<path d="M11 17H7C5.67392 17 4.40215 16.4732 3.46447 15.5355C2.52678 14.5979 2 13.3261 2 12C2 10.6739 2.52678 9.40215 3.46447 8.46447C4.40215 7.52678 5.67392 7 7 7H11V9H7C6.20435 9 5.44129 9.31607 4.87868 9.87868C4.31607 10.4413 4 11.2044 4 12C4 12.7956 4.31607 13.5587 4.87868 14.1213C5.44129 14.6839 6.20435 15 7 15H11V17ZM17 7H13V9H17C17.7956 9 18.5587 9.31607 19.1213 9.87868C19.6839 10.4413 20 11.2044 20 12C20 12.7956 19.6839 13.5587 19.1213 14.1213C18.5587 14.6839 17.7956 15 17 15H13V17H17C18.3261 17 19.5979 16.4732 20.5355 15.5355C21.4732 14.5979 22 13.3261 22 12C22 10.6739 21.4732 9.40215 20.5355 8.46447C19.5979 7.52678 18.3261 7 17 7V7ZM16 11H8V13H16V11Z" />
 					</svg>
 				</button>
-				<TiptapDrop title="Заголовок">
-					<button @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 1 }) }">
-						H1
-					</button>
-					<button @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 2 }) }">
-						H2
-					</button>
-					<button @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 3 }) }">
-						H3
-					</button>
-					<button @click="editor.chain().focus().toggleHeading({ level: 4 }).run()" :class="{ 'is-active': editor && editor.isActive('heading', { level: 4 }) }">
-						H4
-					</button>
-				</TiptapDrop>
 				<button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<path d="M3 18H9V16H3V18ZM3 11V13H15V11H3ZM3 6V8H21V6H3Z" />
@@ -196,7 +196,7 @@
 		</div>
 		<EditorContent :editor="editor" class="custom-scroll editor-content" />
 		<div class="editor-footer">
-			{{ editor.storage.characterCount.characters() }} / {{ editor.storage.characterCount.words() }}
+			{{ editor.storage.characterCount.characters() }}
 		</div>
 	</div>
 
@@ -326,15 +326,6 @@
 				}
 			}
 		}
-
-		@media (max-width: 767.98px) {
-			flex-wrap: nowrap;
-			overflow: auto;
-			scrollbar-width: none;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-		}
 	}
 	.editor-content {
 		height: 240px;
@@ -460,6 +451,40 @@
 		font-size: 14px;
 		color: #595959;
 		padding: 10px;
+	}
+	@media (max-width: 767.98px) {
+		.button-group > * {
+			margin: 2px 4px;
+		}
+		.button-group {
+			& > button,
+			& > label {
+				flex: 0 0 20px;
+				width: 20px;
+				height: 20px;
+			}
+			.tiptap-drop {
+				&__header {
+					span {
+						font-size: 12px;
+						svg {
+							width: 20px;
+							height: 20px;
+						}
+					}
+				}
+				&__body {
+					button,
+					label span {
+						font-size: 12px;
+					}
+				}
+			}
+		}
+		.editor-content,
+		.editor-footer {
+			padding: 10px 5px;
+		}
 	}
 </style>
  

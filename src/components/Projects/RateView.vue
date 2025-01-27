@@ -9,6 +9,7 @@
 		title: String,
 		userRole: String,
 	})
+	
 	const format = 'dd.MM.yyyy'
 	const formatDateValue = value => {
 		let formated = formatDate(value, format)
@@ -23,7 +24,7 @@
 			<div class="sec-top">
 				<div class="sec-top__left">
 					<h2 class="h1">{{ title }}</h2>
-					<div class="h2 project-p__date" v-if="['expert', 'expertSpecComp'].includes(userRole)">{{ formatDateValue(rates[0].createdAt) }}</div>
+					<div class="h2 project-p__date" v-if="['expert', 'expertSpecComp'].includes(userRole)">{{ rates[0].createdAt && formatDateValue(rates[0].createdAt) }}</div>
 				</div>
 			</div>
 			<div class="project-p__rates">

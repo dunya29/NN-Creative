@@ -1,17 +1,15 @@
 <script setup>
-	import {
-		directionArr,
-		granteeArr,
-		projectFieldsArr,
-		projectGranteeFieldsArr,
-	} from '@/module/vars'
-	import Download from '../Icons/Download.vue'
-	import { getFileURL, getImageURL } from '@/functions/getURL'
 	import { computed } from 'vue'
+	import { useCommonStore } from '@/store/common'
+	import { mediaApi } from '@/api/api'
+	import { getImageURL } from '@/functions/getURL'
+	import { projectFieldsArr, projectGranteeFieldsArr } from '@/module/vars'
+	import Download from '../Icons/Download.vue'
 	const props = defineProps({
 		projectItem: Object,
 		userRole: String,
 	})
+	const storeCommon = useCommonStore()
 	const projectFields = projectFieldsArr.filter(
 		item => item.translitName != 'title'
 	)
@@ -33,12 +31,20 @@
 			let allFiles = []
 			projectFileFields.forEach(item => {
 				if (props.projectItem[item.translitName].length > 0) {
-					allFiles.push(...props.projectItem[item.translitName])
+					allFiles.push({
+						files: props.projectItem[item.translitName],
+						paramName: item.translitName,
+						name: item.name,
+					})
 				}
 			})
 			granteeFiles.forEach(item => {
 				if (props.projectItem.grantee[item.translitName].length > 0) {
-					allFiles.push(...props.projectItem.grantee[item.translitName])
+					allFiles.push({
+						files: props.projectItem.grantee[item.translitName],
+						paramName: item.translitName,
+						name: item.name,
+					})
 				}
 			})
 			return allFiles
@@ -46,16 +52,33 @@
 			return []
 		}
 	})
-	const downloadFiles = () => {
+	const downloadFiles = paramName => {
+		props.projectItem[paramName].forEach((el, idx) =>
+			getMediaURL(props.projectItem.id, paramName, idx + 1, el.name)
+		)
+	}
+	const downloadAllFiles = () => {
 		projectAllFileFields.value.forEach(el => {
-			const a = document.createElement('a')
-			a.href = getFileURL(el.url)
-			a.style.display = 'none'
-			a.download = el.name
-			document.body.appendChild(a)
-			a.click()
-			document.body.removeChild(a)
+			el.files.forEach((item, idx) =>
+				getMediaURL(props.projectItem.id, el.paramName, idx + 1, item.name)
+			)
 		})
+	}
+	const getMediaURL = async (project_id, paramName, file_num, filename) => {
+		try {
+			const { data } = await mediaApi.getItem(project_id, paramName, file_num)
+			let url = window.URL.createObjectURL(
+				new Blob([data], { type: data.type })
+			)
+			let link = document.createElement('a')
+			link.href = url
+			link.setAttribute('download', filename)
+			document.body.appendChild(link)
+			link.click()
+			link.remove()
+		} catch (err) {
+			console.log(err)
+		}
 	}
 </script>
 <template>
@@ -63,7 +86,7 @@
 		<section class="mb-60 project-p__sec">
 			<div class="sec-top">
 				<h2 class="h1">{{ projectItem.title }}</h2>
-				<button class="btn main-btn" v-if="userRole === 'manager' && projectAllFileFields.length > 0" @click="()=>downloadFiles()">
+				<button class="btn main-btn" v-if="userRole === 'manager' && projectAllFileFields.length > 0" @click="()=>downloadAllFiles()">
 					<span>Скачать все файлы</span>
 					<Download />
 				</button>
@@ -77,10 +100,10 @@
 						<div class="info-project__files">
 							<template v-for="(item,idx) in projectFileFields" :key="idx">
 								<template v-if="projectItem[item.translitName] && projectItem[item.translitName].length">
-									<a class="btn main-btn" download :href="getFileURL(el.url)" v-for="(el,idx) in projectItem[item.translitName]" :key="idx">
-										<span>{{item.name}}</span>
+									<div class="btn main-btn" @click="downloadFiles(item.translitName)">
+										<span>{{item.name + (projectItem[item.translitName].length > 1 ? ` (${projectItem[item.translitName].length})` : '' )}}</span>
 										<Download />
-									</a>
+									</div>
 								</template>
 							</template>
 						</div>
@@ -103,18 +126,18 @@
 					<div class="info-project__col">
 						<div class="info-project__image" v-if="item.type === 'image'">
 							<div :class="['media-cover', projectItem[item.translitName] && !projectItem[item.translitName].length && 'no-photo']">
-								<img v-if="projectItem[item.translitName] && projectItem[item.translitName].length" :src="getImageURL(projectItem[item.translitName][0].url,870)" :alt="projectItem.title" loading="lazy">
+								<img v-if="projectItem[item.translitName] && projectItem[item.translitName].length" :src="getImageURL(projectItem[item.translitName][0])" :alt="projectItem.title" loading="lazy">
 							</div>
 						</div>
 						<div v-else-if="item.type === 'radio'">
-							<p v-if="item.translitName === 'grantee' && projectItem['grantee']">{{ granteeArr.find(item => item.value === projectItem['grantee'].value).name }}</p>
+							<p v-if="item.translitName === 'grantee' && projectItem['grantee'] && storeCommon.granteeArr.length">{{ storeCommon.granteeArr.find(item => item.value === projectItem['grantee'].value).name }}</p>
 						</div>
 						<div v-else-if="item.type === 'file'">
 							<div class="info-project__files" v-if="projectItem[item.translitName] && projectItem[item.translitName].length">
-								<a class="btn main-btn" download :href="getFileURL(el.url)" v-for="(el,idx) in projectItem[item.translitName]" :key="idx">
-									<span>Скачать</span>
+								<div class="btn main-btn" @click="downloadFiles(item.translitName)">
+									<span>Скачать{{ projectItem[item.translitName].length > 1 ? ` (${projectItem[item.translitName].length})` : '' }}</span>
 									<Download />
-								</a>
+								</div>
 							</div>
 						</div>
 						<div class="info-project__soc" v-else-if="item.type === 'social'">
@@ -125,7 +148,11 @@
 						</div>
 						<div class="page-content" v-else-if="item.type === 'html'" v-html="projectItem[item.translitName]"></div>
 						<div class="page-content" v-else>
-							<p v-if="item.translitName === 'direction'">{{ directionArr.find(item => item.value === projectItem.direction)?.name }}</p>
+							<p v-if="item.translitName === 'direction'">
+								<template v-if="storeCommon.directionArr.length">
+									{{ storeCommon.directionArr.find(item => item.value === projectItem.direction)?.name }}
+								</template>
+							</p>
 							<p v-else-if="item.translitName === 'sum'">{{ projectItem[item.translitName] ? String(projectItem[item.translitName]).replace(/\B(?=(\d{3})+(?!\d))/g, " ").trim() : 0}} руб.</p>
 							<p v-else-if="item.translitName === 'phone'"><a :href="'tel:'+ projectItem[item.translitName]">{{ projectItem[item.translitName] }}</a></p>
 							<p v-else-if="item.translitName === 'email'"><a :href="'mailto:'+ projectItem[item.translitName]">{{ projectItem[item.translitName] }}</a></p>
@@ -148,10 +175,10 @@
 						</div>
 						<div class="info-project__col">
 							<div class="info-project__files" v-if="item.type === 'granteeFile' && projectItem.grantee[item.translitName].length">
-								<a class="btn main-btn" download :href="getFileURL(el.url)" v-for="(el,idx) in projectItem.grantee[item.translitName]" :key="idx">
+								<div class="btn main-btn" v-for="(el,idx) in projectItem.grantee[item.translitName]" :key="idx" @click="getMediaURL(projectItem.id,item.translitName,idx+1,el.name)">
 									<span>Скачать</span>
 									<Download />
-								</a>
+								</div>
 							</div>
 							<div class="page-content" v-else-if="item.type === 'html'" v-html="projectItem.grantee[item.translitName]"></div>
 							<div class="page-content" v-else-if="!['granteeFile', 'html'].includes(item.type)">

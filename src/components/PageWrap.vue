@@ -1,7 +1,7 @@
 <script setup>
-	import { useCommonStore } from '@/store/common'
 	import { onMounted } from 'vue'
 	import { useRoute } from 'vue-router'
+	import { useCommonStore } from '@/store/common'
 	const route = useRoute()
 	const storeCommon = useCommonStore()
 	onMounted(() => {
@@ -14,16 +14,15 @@
 			'recovery',
 			'recovery-success',
 			'verify',
+			'verify-success',
 			'access-denied',
 			'project',
 		].includes(route.name)
 			? storeCommon.unshowHeader()
 			: storeCommon.showHeader()
-	})
-	onMounted(() => {
 		if (!storeCommon.isMounted) {
 			storeCommon.pageOnMounted()
-		}	
+		}
 	})
 </script>
 

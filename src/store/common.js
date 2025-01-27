@@ -6,6 +6,8 @@ export const useCommonStore = defineStore('common', {
         isMounted: false,
         isFirefox: false,
         statusArr: [],
+        directionArr: [],
+        granteeArr: [],
         isNotyClicked: false
     }),
     actions: {
@@ -23,6 +25,12 @@ export const useCommonStore = defineStore('common', {
         },
         setStatus(data) {
             this.statusArr = [...data]
+        },
+        setDirection(data) {
+            this.directionArr = [...data]
+        },
+        setGrantee(data) {
+            this.granteeArr = [...data]
         },
         setFirefox(val) {
             this.isFirefox = val

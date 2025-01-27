@@ -4,6 +4,7 @@
 	import Spinner from '../Icons/Spinner.vue'
 	import Upload from '../Icons/Upload.vue'
 	import Bin from '../Icons/Bin.vue'
+	import { FILE_UPLOAD_URL, TOKEN_KEY } from '@/api/api'
 
 	const props = defineProps({
 		name: String,
@@ -78,7 +79,7 @@
 				(filesField.encodeValue[idx] && filesField.encodeValue[idx].name)
 		) {
 			controller.value[idx].abort()
-		}  else {
+		} else {
 			filesField.encodeValue.splice(idx, 1)
 		}
 		const dt = new DataTransfer()
@@ -97,7 +98,9 @@
 	const dropFile = e => {
 		const dt = new DataTransfer()
 		if (props.isMultiple) {
-			dt.items.add(e.dataTransfer.files)
+			for (let i = 0; i < e.dataTransfer.files.length; i++) {
+				dt.items.add(e.dataTransfer.files[i])
+			}
 		} else {
 			dt.items.add(e.dataTransfer.files[0])
 		}
@@ -136,7 +139,7 @@
 					loading.value = true
 					try {
 						const { data } = await axios.post(
-							'https://httpbin.org/post',
+							FILE_UPLOAD_URL,
 							formData,
 							{
 								signal,
@@ -154,11 +157,15 @@
 										)
 									] = 50 + Math.floor(progress * 50)
 								},
+								headers: {
+									'Content-Type': 'multipart/form-data',
+									Authorization: localStorage.getItem(TOKEN_KEY),
+								},
 							}
 						)
 						const file = {
 							name: item.name,
-							url: 'url',
+							url: data.url,
 						}
 						filesField.encodeValue.push(file)
 						emit('setFileFieldValue', props.name && props.name, [

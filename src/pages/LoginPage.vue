@@ -8,49 +8,71 @@
 	import InputPassword from '@/components/Common/InputPassword.vue'
 	import LoginWrap from '@/components/Login/LoginWrap.vue'
 	import { useFormModule } from '@/module/formModule'
+	import ErrorMod from '@/components/Modals/ErrorMod.vue'
+	import { fetchErrors } from '@/module/vars'
+	import LoginNoty from '@/components/Login/LoginNoty.vue'
 	const route = useRoute()
 	const router = useRouter()
 	const storeAuth = useAuthStore()
 	const formErrEmail = ref(null)
 	const formErrCount = ref(0)
-	const { formError, emailValidate, loginPasswordValidate } = useFormModule()
+	const { onError, errorTitle, emailValidate, loginPasswordValidate } =
+		useFormModule()
 	const schema = {
 		email: val => emailValidate(val),
 		password: val => loginPasswordValidate(val),
 	}
-	const { errors, handleSubmit, isSubmitting, defineField } = useForm({
-		validationSchema: schema,
-		initialValues: {
-			email: storeAuth.userData.email || '',
-		},
-	})
+	const { errors, handleSubmit, isSubmitting, defineField, setFieldError } =
+		useForm({
+			validationSchema: schema,
+			initialValues: {
+				email: storeAuth.userData.email || '',
+			},
+		})
 	const [email, emailAttrs] = defineField('email')
 	const [password] = defineField('password')
 	const onSubmit = handleSubmit(async values => {
+		if (storeAuth.isAuthorized) {
+			storeAuth.logOut()
+		}
 		try {
-			const { data } = await authApi.auth(values.email.toLocaleLowerCase(), values.password)
+			const { data } = await authApi.auth(
+				values.email.toLocaleLowerCase(),
+				values.password
+			)
 			storeAuth.auth(data)
-			if (storeAuth.userData.emailVerified) {
-				storeAuth.userData.disable
-					? router.push('/forbidden')
-					: router.push(route.query.redirect || '/projects')
-			} else {
-				router.push('/verify')
-			}
+			router.push(route.query.redirect || '/projects')
 		} catch (err) {
 			console.log(err)
-			if (err.status === 401) {
-				formError.value = 'Неправильный email или пароль'
-				if (formErrEmail.value === values.email) {
-					formErrCount.value++
-					if (formErrCount.value === 10) {
+			if (err.response.data.errors.validation) {
+				for (let key in values) {
+					if (err.response.data.errors.validation[key]) {
+						setFieldError(key, err.response.data.errors.validation[key])
+					}
+				}
+			} else if (err.response.data.errors.common) {
+				errorTitle.value = err.response.data.errors.common[0]
+				if (fetchErrors.forbidden === errorTitle.value) {
+					router.push('/forbidden')
+				} else if (fetchErrors.verify === errorTitle.value) {
+					router.push(`/verify?email=${values.email}`)
+				} else {
+					onError.value = true
+				}
+			}
+			if (formErrEmail.value === values.email) {
+				formErrCount.value++
+				if (formErrCount.value >= 10) {
+					try {
 						await authApi.disableUser(values.email)
 						router.push('/forbidden')
+					} catch (err) {
+						console.log(err)
 					}
-				} else {
-					formErrEmail.value = values.email
-					formErrCount.value = 0
 				}
+			} else {
+				formErrEmail.value = values.email
+				formErrCount.value = 0
 			}
 		}
 	})
@@ -88,7 +110,6 @@
 					<InputPassword v-model="password" :error="errors.password" />
 				</div>
 				<div class="form__footer">
-					<div v-if="formError" data-error="" class="form__error">{{ formError }}</div>
 					<div class="form__btns">
 						<button class="btn main-btn" :class="isSubmitting && 'loading'" type="submit" :disabled="isSubmitting">
 							<span>Войти</span>
@@ -97,6 +118,12 @@
 					</div>
 				</div>
 			</form>
+			<LoginNoty />
 		</LoginWrap>
+		<Teleport to="body">
+			<transition name="fadeUp">
+				<ErrorMod v-if="onError" @closeModal="() => onError = false" :title="errorTitle" />
+			</transition>
+		</Teleport>
 	</PageWrap>
 </template>

@@ -1,10 +1,11 @@
 <script setup>
-	import { onMounted, ref, watch } from 'vue'
+	import { computed, onMounted, ref, watch } from 'vue'
 	import { useDateModule } from '@/module/dateModule'
 	const props = defineProps({
 		messages: Array,
 		userId: Number,
 	})
+	const senderId = computed(() => props.userId)
 	const { formatUTCDate } = useDateModule()
 	const emit = defineEmits(['sendMessage', 'onRead'])
 	const scrollItemsRef = ref(null)
@@ -13,10 +14,17 @@
 	const onSubmit = () => {
 		if (message.value) {
 			loading.value = true
-			emit('sendMessage', message.value, () => {
-				message.value = ''
-				loading.value = false
-			})
+			emit(
+				'sendMessage',
+				message.value,
+				() => {
+					message.value = ''
+					scrollToBottom()
+				},
+				() => {					
+					loading.value = false
+				}
+			)
 		}
 	}
 	function scrollToBottom() {
@@ -30,14 +38,6 @@
 		emit('onRead')
 		scrollToBottom()
 	})
-	watch(
-		() => props.messages,
-		() => {
-			setTimeout(() => {
-				scrollToBottom()
-			}, 0)
-		}
-	)
 </script>
 
 <template>
@@ -47,7 +47,7 @@
 		</div>
 		<div class="messages__items" v-else>
 			<div class="custom-scroll" ref="scrollItemsRef">
-				<div :class="['item-message', item['user_id'] === userId ? 'is-out' : 'is-in']" v-for="(item,idx) in messages" :key="idx">
+				<div :class="['item-message', Number(item['user_id']) === Number(senderId) ? 'is-out' : 'is-in']" v-for="(item,idx) in messages" :key="idx">
 					<div class="item-message__date">{{formatUTCDate(item.timestamp)}}</div>
 					<p>{{item.text}}</p>
 				</div>

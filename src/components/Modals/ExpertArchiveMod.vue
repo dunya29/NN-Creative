@@ -18,7 +18,7 @@
 					<div class="project-p__actions">
 					</div>
 					<div class="project-p__actions">
-						<button class="btn stroke-btn" @click="() => emit('closeModal')">
+						<button class="btn stroke-btn btn--icon" @click="() => emit('closeModal')">
 							<span>Закрыть</span>
 							<Close />
 						</button>

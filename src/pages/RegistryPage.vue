@@ -1,23 +1,27 @@
 <script setup>
 	import { useRouter } from 'vue-router'
+	import { useForm } from 'vee-validate'
 	import { MaskInput } from 'vue-3-mask'
 	import { authApi } from '@/api/api'
+	import { useAuthStore } from '@/store/auth'
+	import { useFormModule } from '@/module/formModule'
 	import PageWrap from '@/components/PageWrap.vue'
 	import LoginWrap from '@/components/Login/LoginWrap.vue'
 	import InputPassword from '@/components/Common/InputPassword.vue'
-	import { useAuthStore } from '@/store/auth'
-	import { useFormModule } from '@/module/formModule'
-	import { useForm } from 'vee-validate'
+	import ErrorMod from '@/components/Modals/ErrorMod.vue'
+	import politikaPdf from '/static/files/politika-obrabotki-personalnyh-dannyh-nn-creative.pdf'
+	import LoginNoty from '@/components/Login/LoginNoty.vue'
 	const storeAuth = useAuthStore()
 	const router = useRouter()
 	const {
-		formError,
+		onError,
 		loginValidate,
 		emailValidate,
 		phoneValidate,
 		passwordValidate,
 		passwordConfirmValidate,
 		agreeValidate,
+		formOnError,
 	} = useFormModule()
 	const schema = {
 		name: val => loginValidate(val),
@@ -27,9 +31,10 @@
 		passwordConfirm: val => passwordConfirmValidate(val, password),
 		agree: val => agreeValidate(val),
 	}
-	const { errors, handleSubmit, isSubmitting, defineField } = useForm({
-		validationSchema: schema,
-	})
+	const { errors, handleSubmit, isSubmitting, defineField, setFieldError } =
+		useForm({
+			validationSchema: schema,
+		})
 	const [name, nameAttrs] = defineField('name')
 	const [phone, phoneAttrs] = defineField('phone')
 	const [email, emailAttrs] = defineField('email')
@@ -45,15 +50,15 @@
 			emailVerified: false,
 			disable: false,
 		}
+		if (storeAuth.isAuthorized) {
+			storeAuth.logOut()
+		}
 		try {
 			await authApi.createUser(user)
-			storeAuth.logOut()
-			router.push('/verify')
+			router.push(`/verify?email=${values.email}`)
 		} catch (err) {
 			console.log(err)
-			if (err.status === 401) {
-				formError.value = 'Пользователь с таким email уже существует'
-			}
+			formOnError(err, values, setFieldError)
 		}
 	})
 </script>
@@ -88,14 +93,13 @@
 					<label class="item-checkbox">
 						<input name="agree" type="checkbox" v-model="agree" v-bind="agreeAttrs" />
 						<span>
-							Нажимая кнопку, вы соглашаетесь на обработку персональных данный в соответствии с политикой обработки данных
+							Нажимая кнопку, вы соглашаетесь на обработку персональных данный в соответствии с <a :href="politikaPdf" target="_blank">политикой обработки данных</a>
 							<svg>
 								<path d="M2 6.15L4.4 8.6L10.1 3" />
 							</svg>
 						</span>
 						<div data-error="">{{ errors.agree }}</div>
 					</label>
-					<div class="form__error" data-error="" v-if="formError">{{ formError }}</div>
 					<div class="form__btns">
 						<button class="btn main-btn" :class="isSubmitting && 'loading'" type="submit" :disabled="isSubmitting">
 							<span>Зарегистрироваться</span>
@@ -103,6 +107,12 @@
 					</div>
 				</div>
 			</form>
+			<LoginNoty />
 		</LoginWrap>
+		<Teleport to="body">
+			<transition name="fadeUp">
+				<ErrorMod v-if="onError" @closeModal="() => onError = false" />
+			</transition>
+		</Teleport>
 	</PageWrap>
 </template>

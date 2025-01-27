@@ -1,4 +1,6 @@
 <script setup>
+	import { onBeforeMount, ref } from 'vue'
+	import simplebar from 'simplebar-vue'
 	import { wavesApi } from '@/api/api'
 	import Plus from '@/components/Icons/Plus.vue'
 	import AddEditWaveMod from '@/components/Modals/AddEditWaveMod.vue'
@@ -6,9 +8,6 @@
 	import SuccessMod from '@/components/Modals/SuccessMod.vue'
 	import PageWrap from '@/components/PageWrap.vue'
 	import WavesCard from '@/components/Waves/WavesCard.vue'
-	import simplebar from 'simplebar-vue'
-	import { onBeforeMount, ref } from 'vue'
-
 	const waves = ref([])
 	const success = ref(false)
 	const successTitle = ref('')
@@ -82,14 +81,14 @@
 							</tr>
 						</thead>
 						<tbody v-if="waves">
-							<WavesCard v-for="item in waves" :key="item.id" :id="item.id" :name="item.name" :start="item.start" :end="item.end" @delWave="delWave" @editWave="editWave" />
+							<WavesCard v-for="item in waves" :key="item.id" :disabledDates="waves.filter(el => el.id !== item.id)" :id="item.id" :name="item.name" :start="item.start" :end="item.end" @delWave="delWave" @editWave="editWave" />
 						</tbody>
 					</table>
 				</simplebar>
 			</div>
 			<Teleport to="body">
 				<transition name="fadeUp">
-					<AddEditWaveMod v-if="addWaveModal" title="Добавление волны" @editWave="addWave" @closeModal="()=>addWaveModal = false" />
+					<AddEditWaveMod v-if="addWaveModal" title="Добавление волны" :waves="waves" @editWave="addWave" @closeModal="()=>addWaveModal = false" />
 				</transition>
 			</Teleport>
 			<Teleport to="body">

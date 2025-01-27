@@ -1,4 +1,4 @@
-import { authApi } from '@/api/api'
+import { authApi, getToken } from '@/api/api'
 import { defineStore } from 'pinia'
 const TOKEN_KEY = "creative-jwt-token"
 const userData = {
@@ -12,7 +12,7 @@ const userData = {
 }
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        logged: false,
+        isAuthorized: false,
         userData,
         isMounted: false,
         isLogOutClicked: false
@@ -23,7 +23,8 @@ export const useAuthStore = defineStore('auth', {
             this.logInSuccess(params.data)
         },
         logInSuccess(params) {
-            this.logged = true
+            getToken()
+            this.isAuthorized = true
             this.userData = {...this.userData, ...params}
         },
         logOutOnClick() {
@@ -42,7 +43,8 @@ export const useAuthStore = defineStore('auth', {
         },
         logOut() {
             localStorage.removeItem(TOKEN_KEY)
-            this.logged = false
+            getToken()
+            this.isAuthorized = false
             this.userData = {...userData}
             this.isLogOutClicked = false
         }

@@ -24,6 +24,9 @@
         height: 32px;
         border-radius: 8px;
         cursor: pointer;
+        &.no-photo {
+            background-size: 24px 24px;
+        }
     }
     &__date {
         font-size: 12px;

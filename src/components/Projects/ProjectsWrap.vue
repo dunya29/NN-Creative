@@ -13,6 +13,7 @@
 	import ProjectMod from '../Modals/ProjectMod.vue'
 	import ArrTop from '../Icons/ArrTop.vue'
 	import ArrBottom from '../Icons/ArrBottom.vue'
+	import { useProjectModule } from '@/module/projectModule'
 	const route = useRoute()
 	const router = useRouter()
 	const storeAuth = useAuthStore()
@@ -80,11 +81,13 @@
 		locationSearch,
 		filterStatusArr,
 		filterDirectionArr,
+		filterWavesArr,
 		years,
 		setOrder,
 		statusOnChange,
 		directionOnChange,
 		yearOnChange,
+		waveOnChange,
 		setPage,
 		checkSortParam,
 	} = useTableModule(storeAuth.userData.userRole, fetchItems)
@@ -107,6 +110,7 @@
 	onBeforeMount(() => {
 		checkParams()
 		redirectToProjects()
+		useProjectModule()
 	})
 	watch(
 		() => filters.value.query,
@@ -134,7 +138,7 @@
 					</div>
 				</div>
 			</template>
-			<slot v-else :role="storeAuth.userData.userRole" :years="years" :activeYear="filters.year" :yearOnChange="yearOnChange"></slot>
+			<slot v-else :userName="storeAuth.userData.name" :role="storeAuth.userData.userRole" :years="years" :activeYear="filters.year" :yearOnChange="yearOnChange"></slot>
 			<div v-if="isMounted && !locationSearch && totalCount === 0 && route.name === 'projects'" class="projects__empty">
 				<p>Проектов не найдено</p>
 			</div>
@@ -198,7 +202,9 @@
 									<Search v-model="filters.title" :reset="true" />
 								</td>
 								<td v-if="['expert', 'expertSpecComp', 'manager'].includes(storeAuth.userData.userRole)">
-									<Search type="number" v-model="filters.wave" />
+									<RadioDropdown v-if="filterWavesArr.length > 1" :items="filterWavesArr" :selected="filters.wave" @onChange="waveOnChange" :isMobModal="true" title="Волна">
+										<span :class="filters.wave && 'selected'">{{ filters.wave ? filterWavesArr.find(item => item.value === filters.wave).name : "Фильтр" }}</span>
+									</RadioDropdown>
 								</td>
 								<td v-if="['expert', 'expertSpecComp'].includes(storeAuth.userData.userRole)">
 									<RadioDropdown :items="filterDirectionArr" :selected="filters.direction" @onChange="directionOnChange" :isMobModal="true" title="Направление">
@@ -213,7 +219,7 @@
 							</tr>
 						</thead>
 						<tbody v-if="totalCount">
-							<ProjectCard v-for="item in projects" :key="item.id" :data="{...item,status:filterStatusArr.find(el=>el.value === item.status),direction:filterDirectionArr.find(el=>el.value === item.direction) }" :role="storeAuth.userData.userRole" @openProject="openProject" />
+							<ProjectCard v-for="item in projects" :key="item.id" :data="{...item,status:filterStatusArr.find(el=>el.value === item.status),direction:filterDirectionArr.find(el=>el.value === item.direction), wave:filterWavesArr.find(el=> item.wave ? el.value === item.wave : null) }" :role="storeAuth.userData.userRole" @openProject="openProject" />
 						</tbody>
 					</table>
 				</simplebar>

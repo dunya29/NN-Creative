@@ -18,6 +18,9 @@ export const useDateModule = () => {
 	const formatDateValue = (value) => {
 		return formatDate(value, format)
 	}
+	const setDeadline = (value) => {
+		return new Date(formatDate(value, 'yyyy-MM-dd')).toISOString()
+	}
 	const parseDateValue = (value) => {
 		return parse(value, format, new Date())
 	}
@@ -27,12 +30,27 @@ export const useDateModule = () => {
 			return "Invalid date format";
 		}
 		const year = date.getFullYear();
-		const month = date.getMonth() + 1 < 10 ? '0' + date.getMonth() + 1 : date.getMonth() + 1
+		const month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
 		const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
 		const hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
 		const minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
 
 		return `${year}-${month}-${day} в ${hours}:${minutes}`;
 	}
-	return { locale, format, placeholder, setEndLowerLimit, formatDateValue, parseDateValue, formatUTCDate }
+	function disabledDates(arr) {
+		if (arr && arr.length) {
+			let disabledArr = []
+			arr.forEach(item => {
+				let startDate = parseDateValue(item.start)
+				let endDate = parseDateValue(item.end)
+				for (let i = startDate; i <= endDate; i.setDate(i.getDate() + 1)) {
+					disabledArr.push(new Date(i))
+				}
+			})
+			return disabledArr
+		} else {
+			return []
+		}
+	}
+	return { locale, format, placeholder, setEndLowerLimit, formatDateValue, parseDateValue, formatUTCDate, disabledDates, setDeadline }
 }

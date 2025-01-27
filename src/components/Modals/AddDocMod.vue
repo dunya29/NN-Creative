@@ -50,8 +50,12 @@
 		if (!docFormFields.some(item => item.error)) {
 			let newDoc = {
 				name: docFormFields[0].value,
-				//docURL: docFormFields[1].value[0].url,
-				docURL: 'docs/polzovatelskoe-soglashenie.pdf',//удалить
+				docURL: [
+					{
+					    "name": docFormFields[1].value[0].name,
+					    "url": docFormFields[1].value[0].url
+				    }
+			    ],
 				orderId: props.maxOrderId + 1,
 			}
 			loading.value = true

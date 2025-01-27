@@ -67,6 +67,17 @@
             margin: 4px;
         }
     }
+    &__noty {
+        margin-top: 25px;
+        p {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
     @media (max-width: vars.$bp1) {
         &__content {
             max-width: 520px;
@@ -105,6 +116,13 @@
                 max-width: 100%;
                 height: auto;
                 margin: auto 0 0;
+            }
+        }
+    }
+    @media (max-width: vars.$bp5) {
+        &__noty {
+            p {
+                font-size: 12px;
             }
         }
     }

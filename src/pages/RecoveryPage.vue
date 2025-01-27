@@ -1,4 +1,5 @@
 <script setup>
+	import { ref } from 'vue'
 	import { useRoute, useRouter } from 'vue-router'
 	import { authApi } from '@/api/api'
 	import InputPassword from '@/components/Common/InputPassword.vue'
@@ -6,6 +7,7 @@
 	import { useFormModule } from '@/module/formModule'
 	import { useForm } from 'vee-validate'
 	import PageWrap from '@/components/PageWrap.vue'
+	import ErrorMod from '@/components/Modals/ErrorMod.vue'
 	const router = useRouter()
 	const route = useRoute()
 	const { passwordValidate, passwordConfirmValidate } = useFormModule()
@@ -18,13 +20,16 @@
 	})
 	const [password] = defineField('password')
 	const [passwordConfirm] = defineField('passwordConfirm')
+
+	const onError = ref(false)
 	const onSubmit = handleSubmit(async values => {
-		const email = route.query.email
+		const token = route.query.token
 		try {
-			await authApi.recoveryPassword(email, values.password)
+			await authApi.recoveryPassword(token, values.password)
 			router.push('/recovery-success')
 		} catch (err) {
 			console.log(err)
+			onError.value = true
 		}
 	})
 </script>
@@ -49,5 +54,10 @@
 				</div>
 			</form>
 		</LoginWrap>
+		<Teleport to="body">
+			<transition name="fadeUp">
+				<ErrorMod v-if="onError" @closeModal="() => onError = false"/>
+			</transition>
+		</Teleport>
 	</Pagewrap>
 </template>
