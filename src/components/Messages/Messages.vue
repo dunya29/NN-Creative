@@ -13,26 +13,29 @@
 	const emit = defineEmits(['setChat'])
 	const storeAuth = useAuthStore()
 	const storeCommon = useCommonStore()
-	const mounted = ref(false)
 	const messages = ref([])
 	const unReadMessages = ref([])
 	const messagesRef = ref(null)
+	let messageInterval
 	const getMessages = async () => {
+		clearInterval(messageInterval)
 		try {
 			const { data } = await messagesApi.getItems({
 				project_id: props.projectId,
 			})
 			messages.value = [...data]
 			unReadMessages.value = messages.value.filter(
-				item => Number(item['user_id']) !== Number(storeAuth.userData.id) && !item.isRead
+				item =>
+					Number(item['user_id']) !== Number(storeAuth.userData.id) &&
+					!item.isRead
 			)
 		} catch (err) {
 			console.log(err)
 		} finally {
-			if (mounted.value) {
+			messageInterval = setInterval(() => {
 				getMessages()
-			}
-		}
+			}, 60000)
+		} 
 	}
 	const onRead = async () => {
 		await getMessages()
@@ -49,6 +52,7 @@
 						isReadArr,
 					},
 				})
+				await getMessages()
 			}
 		} catch (err) {
 			console.log(err)
@@ -72,7 +76,6 @@
 		} finally {
 			callback()
 		}
-		
 	}
 	const handleClickOutside = event => {
 		if (
@@ -84,16 +87,15 @@
 		}
 	}
 	onMounted(() => {
-		mounted.value = true
 		getMessages()
-		if (storeCommon.isNotyClicked) {
+		/* if (storeCommon.isNotyClicked) {
 			emit('setChat', true)
 			storeCommon.notyOnSeen()
-		}
+		} */
 		window.addEventListener('click', handleClickOutside)
 	})
 	onUnmounted(() => {
-		mounted.value = false
+		clearInterval(messageInterval)
 		window.removeEventListener('click', handleClickOutside)
 	})
 </script>

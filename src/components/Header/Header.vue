@@ -84,7 +84,7 @@
 					</nav>
 				</div>
 				<div class="header__right">
-					<Notifications v-if="['user', 'manager'].includes(storeAuth.userData.userRole)" :isHeaderHidden="isHeaderHidden" />
+					<!-- <Notifications v-if="['user', 'manager'].includes(storeAuth.userData.userRole)" :isHeaderHidden="isHeaderHidden" /> -->
 					<div class="user-btn">
 						<RouterLink to="/account" class="user-btn__top">
 							<User />

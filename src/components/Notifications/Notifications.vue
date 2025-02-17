@@ -12,13 +12,19 @@
 	const readNotifications = ref([])
 	const unReadNotifications = ref([])
 	const notificationsRef = ref(null)
+	let notificationsInterval
 	const getNotifications = async () => {
+		clearInterval(notificationsInterval)
 		try {
 			const { data } = await notificationsApi.getItems()
 			readNotifications.value = [...data.items].filter(item => item.isRead)
 			unReadNotifications.value = [...data.items].filter(item => !item.isRead)
 		} catch (err) {
 			console.log(err)
+		} finally {
+			notificationsInterval = setInterval(() => {
+				getNotifications()
+			}, 60000)
 		}
 	}
 	const onRead = async id => {
@@ -41,13 +47,9 @@
 			showNotifications.value = false
 		}
 	}
-	let notificationsInterval
 	onMounted(async () => {
 		getNotifications()
 		window.addEventListener('click', handleClickOutside)
-		notificationsInterval = setInterval(() => {
-			getNotifications()
-		}, 60000)
 	})
 	onUnmounted(() => {
 		window.removeEventListener('click', handleClickOutside)

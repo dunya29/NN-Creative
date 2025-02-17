@@ -166,7 +166,7 @@ export const useTableModule = (userRole = false, fetchItems = false) => {
 		return filters.value.sortBy === param ? true : false
 	}
 	onBeforeMount(async () => {
-		if (window.location.search && ['projects', 'search'].includes(route.name)) {
+		if (window.location.search && ['projects', 'search', 'register'].includes(route.name)) {
 			let query = Object.entries(route.query)
 			setQuery(query)
 		}

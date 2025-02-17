@@ -26,9 +26,11 @@
     &__right {
         display: flex;
         align-items: center;
+        margin-left: 24px;
     }
 }
 .user-btn {
+    max-width: 450px;
     position: relative;
     &:hover .user-btn__logout {
         visibility: visible;
@@ -67,6 +69,15 @@
             padding: 10px 12px;
             justify-content: flex-start;
         }
+    }
+    @media (max-width: vars.$bp1) {
+        max-width: 400px;
+    }
+    @media (max-width: vars.$bp2) {
+        max-width: 170px;
+    }
+    @media (max-width: vars.$bp3) {
+        max-width: 450px;
     }
 }
 .header-notifications {

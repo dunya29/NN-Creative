@@ -426,7 +426,7 @@
 						<span>Сохранить</span>
 						<Save />
 					</button>
-					<Messages v-if="tabs === 'view' && ['user', 'manager'].includes(storeAuth.userData.userRole) && projectItem.status && projectItem.status !== '9'" :projectId="id" :showChat="showChat" @setChat="setChat" />
+					<!-- <Messages v-if="tabs === 'view' && ['user', 'manager'].includes(storeAuth.userData.userRole) && projectItem.status && projectItem.status !== '9'" :projectId="id" :showChat="showChat" @setChat="setChat" /> -->
 					<button class="btn stroke-btn btn--icon" @click="() => closeBtnOnClick()">
 						<span>Закрыть</span>
 						<Close />

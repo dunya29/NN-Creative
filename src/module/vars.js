@@ -34,6 +34,8 @@ export const projectFieldsArr = [
             types: ["image/jpeg", "image/gif", "image/png"],
             format: ".jpg, .jpeg, .gif, .png",
             resolution: "1420x660",
+            width: 1420,
+            height: 660,
             size: 5 * 1024 * 1024
         }
     },
@@ -44,7 +46,7 @@ export const projectFieldsArr = [
         translitName: "direction",
         required: true,
         error: false,
-        errorTxt: "Заполните поле"
+        errorTxt: "Выберите направление"
     },
     {
         name: "Грантополучатель",
@@ -242,10 +244,7 @@ export const projectFieldsArr = [
         value: "",
         placeholder: "Например, https://disk.yandex.ru/i/aBcDeFg12345",
         translitName: "videoURL",
-        type: "link",
-        required: true,
-        error: false,
-        errorTxt: "Заполните поле"
+        type: "link"
     },
     {
         name: "Презентация проекта",
@@ -418,19 +417,13 @@ export const projectGranteeFieldsArr = [
                 name: "Свидетельство о государственной регистрации юридического лица в Едином государственном реестре юридических лиц (ЕГРЮЛ)",
                 value: [],
                 translitName: "legalEntityRegCert",
-                type: "granteeFile",
-                required: true,
-                error: false,
-                errorTxt: "Выберите файл"
+                type: "granteeFile"
             },
             {
                 name: "Свидетельство о регистрации юридического лица в налоговом органе по месту нахождения юридического лица",
                 value: [],
                 translitName: "legalEntityTaxRegCert",
-                type: "granteeFile",
-                required: true,
-                error: false,
-                errorTxt: "Выберите файл"
+                type: "granteeFile"
             },
             {
                 name: "Выписка из Единого государственного реестра юридических лиц (ЕГРЮЛ)",
@@ -469,19 +462,13 @@ export const projectGranteeFieldsArr = [
                 name: "Свидетельство о государственной регистрации ИП в Едином государственном реестре индивидуальных предпринимателей (ЕГРИП)",
                 value: [],
                 translitName: "ipRegCert",
-                type: "granteeFile",
-                required: true,
-                error: false,
-                errorTxt: "Выберите файл"
+                type: "granteeFile"
             },
             {
                 name: "Свидетельство о регистрации ИП в налоговом органе по месту нахождения",
                 value: [],
                 translitName: "ipTaxRegCert",
-                type: "granteeFile",
-                required: true,
-                error: false,
-                errorTxt: "Выберите файл"
+                type: "granteeFile"
             },
             {
                 name: "Выписка из Единого государственного реестра индивидуальных предпринимателей (ЕГРИП)",

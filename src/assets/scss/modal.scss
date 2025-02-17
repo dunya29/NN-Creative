@@ -27,6 +27,25 @@
     &__txt {
         font-weight: 500;
     }
+    &.maintenance {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 16px;
+        align-items: start;
+        svg {
+            fill: red;
+            width: 12px;
+            height: 48px;
+        }
+        .js-lbl__text {
+            align-self: center;
+        }
+    }
+    @media (min-width: vars.$bp4) {
+        &.maintenance {
+            max-width: 660px;
+        }
+    }
 }
 .modal {
     position: fixed;
@@ -89,7 +108,8 @@
             font-size: 14px;
             font-weight: 500;
             margin-top: -12px;
-            & + .form, & + .btn {
+            & + .form,
+            & + .btn {
                 margin-top: 24px;
             }
         }
@@ -150,7 +170,8 @@
             margin-bottom: 9px;
             & + p {
                 margin-top: 0;
-                & + .form, & + .btn {
+                & + .form,
+                & + .btn {
                     margin-top: 20px;
                 }
             }
@@ -234,7 +255,7 @@
     }
     @media (max-width: vars.$bp1) {
         .modal__content {
-            padding-top: 112px
+            padding-top: 112px;
         }
     }
     @media (max-width: vars.$bp2) {
@@ -242,12 +263,12 @@
             padding: 0;
         }
     }
-     @media (max-width: vars.$bp4) {
+    @media (max-width: vars.$bp4) {
         .modal__overlay {
             overflow: auto;
         }
         .modal__content {
-            padding-top: 100px
+            padding-top: 100px;
         }
         .modal__scroll {
             background: var(--white);

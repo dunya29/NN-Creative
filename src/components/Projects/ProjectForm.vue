@@ -327,11 +327,12 @@
 								<RadioDropdown v-if="storeCommon.directionArr.length" :name="item.translitName" :items="storeCommon.directionArr" :selected="item.value" @onChange="selectOnChange">
 									<span class="selected">{{ storeCommon.directionArr.find(el => el.value === item.value) ? storeCommon.directionArr.find(el => el.value === item.value).name : storeCommon.directionArr[0].name }}</span>
 								</RadioDropdown>
+								<span data-error="" v-if="item.error">{{ item.errorTxt }}</span>
 							</template>
 							<div class="info-project__file" v-else-if="['file', 'granteeFile', 'image'].includes(item.type)">
-								<FileForm :class="`info-project__file--${item.type}`" :isMultiple="item.isMultiple" :name="item.translitName" :ref="item.type === 'granteeFile' ? 'granteeFileForm' : 'fileForm'" :types="item.validate?.types || file.types" :emptyError="item.error" :format="item.validate?.format || file.format" :maxSize="item.validate?.size || file.size" @setFileFieldValue="setFileValue" @fileFieldIsError="fileIsError" :initValue="item.type === 'granteeFile' ? initialValues && initialValues.grantee && initialValues.grantee[item.translitName] && initialValues.grantee[item.translitName] : initialValues && initialValues[item.translitName] && initialValues[item.translitName]" />
+								<FileForm :class="`info-project__file--${item.type}`" :maxWidth="item.validate?.width ? Number(item.validate.width) : null" :maxHeight="item.validate?.height ? Number(item.validate.height) : null" :isMultiple="item.isMultiple" :name="item.translitName" :ref="item.type === 'granteeFile' ? 'granteeFileForm' : 'fileForm'" :types="item.validate?.types || file.types" :emptyError="item.error" :format="item.validate?.format || file.format" :maxSize="item.validate?.size || file.size" @setFileFieldValue="setFileValue" @fileFieldIsError="fileIsError" :initValue="item.type === 'granteeFile' ? initialValues && initialValues.grantee && initialValues.grantee[item.translitName] && initialValues.grantee[item.translitName] : initialValues && initialValues[item.translitName] && initialValues[item.translitName]" />
 								<div class="info-project__file-info" v-if="item.type === 'image'">
-									<p>Желательный размер не менее {{item.validate?.resolution}}&nbsp;px, не более {{ item.validate?.size / 1024 /1024}}&nbsp;Мб</p>
+									<p>Желательный размер не менее {{ item.validate?.width }}x{{ item.validate?.height }}&nbsp;px, не более {{ item.validate?.size / 1024 /1024}}&nbsp;Мб</p>
 									<p>Допустимые форматы изображения: {{String(item.validate?.format).split(", ").map(ext => ext.replace(/^\./, "")).join(", ").toUpperCase()}}</p>
 									<p>Важно! На фото не должно быть надписей и водяных знаков</p>
 								</div>

@@ -11,8 +11,6 @@
 		types: Array,
 		format: String,
 		maxSize: Number,
-		maxWidth: Number,
-		maxHeight: Number,
 		emptyError: Boolean,
 		isMultiple: Boolean,
 		initValue: Array,
@@ -46,18 +44,6 @@
 		filesField.progressValue = []
 		filesItems.value = []
 	}
-	const dataURLtoFile = (dataurl, filename) => {
-		var arr = dataurl.split(','),
-			mime = arr[0].match(/:(.*?);/)[1],
-			bstr = atob(arr[1]),
-			n = bstr.length,
-			u8arr = new Uint8Array(n)
-		while (n--) {
-			u8arr[n] = bstr.charCodeAt(n)
-		}
-
-		return new File([u8arr], filename, { type: mime })
-	}
 	const validateFile = files => {
 		filesField.value = []
 		abort()
@@ -79,54 +65,7 @@
 			} else {
 				filesField.error = false
 				filesField.errorTxt = 'Выберите файл'
-				if (props.maxWidth || props.maxHeight) {
-					const reader = new FileReader()
-					reader.onload = function (e) {
-						const img = new Image()
-						img.src = e.target.result
-						img.onload = function () {
-							let width = img.width
-							let height = img.height
-							if (
-								(props.maxWidth && width > props.maxWidth) ||
-								(props.maxHeight && height > props.maxHeight)
-							) {
-								const aspectRatio = width / height
-								if (width > props.maxWidth) {
-									width = props.maxWidth
-									height = width / aspectRatio
-								}
-
-								if (height > props.maxHeight) {
-									height = props.maxHeight
-									width = height * aspectRatio
-								}
-								const imageCanvas = document.createElement('canvas')
-								imageCanvas.classList.add('image-canvas')
-								document.body.appendChild(imageCanvas)
-								imageCanvas.width = width
-								imageCanvas.height = height
-								imageCanvas.style.display="none"
-								let ctx = document
-									.querySelector('.image-canvas')
-									.getContext('2d')
-								ctx.drawImage(img, 0, 0, width, height)
-								const dataUrl = imageCanvas.toDataURL(file.type)
-								const resizedFile = dataURLtoFile(
-									dataUrl,
-									file.name
-								)
-								filesField.value.push(resizedFile)
-								document.body.removeChild(imageCanvas)
-							} else {
-								filesField.value.push(file)
-							}
-						}
-					}
-					reader.readAsDataURL(file)
-				} else {
-					filesField.value.push(file)
-				}
+				filesField.value.push(file)
 			}
 		}
 	}
@@ -253,7 +192,7 @@
 					}
 				})
 			}
-		},{deep: true}
+		}
 	)
 	watch(
 		() => props.emptyError,

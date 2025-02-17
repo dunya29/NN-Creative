@@ -1,5 +1,5 @@
 <script setup>
-	import { onBeforeMount } from 'vue'
+	import { onBeforeMount, ref } from 'vue'
 	import Header from './components/Header/Header.vue'
 	import { useAuthStore } from './store/auth'
 	import { useCommonStore } from './store/common'
@@ -32,6 +32,6 @@
 		</RouterView>
 		<transition name="preloader-fade">
 			<Preloader v-if="!storeCommon.isMounted" />
-		</transition>		
+		</transition>
 	</simplebar>
 </template>
